@@ -1,0 +1,35 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+
+env:
+  CR_URI: calc-api.cr.cloud.ru
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Log in to Evolution Artifact Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.CR_URI }}
+        username: ${{ secrets.EVO_CR_LOGIN }}
+        password: ${{ secrets.EVO_CR_PWD }}
+
+    - name: Build and push docker image to Evolution Aritfact Registry
+      uses: docker/build-push-action@v5
+      with:
+        push: true
+        tags: ${{ env.CR_URI }}/calc-api:${{ github.sha }}
+        file: ./Dockerfile
+        context: ./
