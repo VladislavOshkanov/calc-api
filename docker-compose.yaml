@@ -1,0 +1,9 @@
+services:
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+  app:
+    image: calc-api.cr.cloud.ru/calc-api:latest
+    ports:
+      - "8000:8000"
