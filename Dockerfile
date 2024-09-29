@@ -12,7 +12,6 @@ ENV BINARY_NAME=$BINARY_NAME_DEFAULT
 # dependencies when lock and toml not is modified.
 COPY Cargo.lock .
 COPY Cargo.toml .
-COPY Rocket.toml .
 RUN mkdir src \
     && echo "fn main() {print!(\"Dummy main\");} // dummy file" > src/main.rs
 RUN rustup target add x86_64-unknown-linux-musl
@@ -38,6 +37,7 @@ ENV MY_GREAT_CONFIG=$MY_GREAT_CONFIG_DEFAULT
 
 ENV RUST_LOG="error,$BINARY_NAME=info"
 COPY --from=builder /build-out/$BINARY_NAME /
+COPY Rocket.toml .
 
 # Start with an execution list (there is no sh in a scratch image)
 # No shell => no variable expansion, |, <, >, etc 
