@@ -1,0 +1,2 @@
+[default.databases.openapi_mongo]
+url = "mongodb://localhost:27017"
