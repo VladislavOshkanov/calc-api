@@ -1,2 +1,7 @@
 [default.databases.openapi_mongo]
 url = "mongodb://localhost:27017"
+
+
+[default]
+address = "0.0.0.0"
+port = 8000

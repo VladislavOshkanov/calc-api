@@ -30,6 +30,6 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         push: true
-        tags: ${{ env.CR_URI }}/calc-api:${{ github.sha }}
+        tags: ${{ env.CR_URI }}/calc-api:latest
         file: ./Dockerfile
         context: ./
