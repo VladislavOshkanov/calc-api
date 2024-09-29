@@ -12,6 +12,7 @@ ENV BINARY_NAME=$BINARY_NAME_DEFAULT
 # dependencies when lock and toml not is modified.
 COPY Cargo.lock .
 COPY Cargo.toml .
+COPY Rocket.toml .
 RUN mkdir src \
     && echo "fn main() {print!(\"Dummy main\");} // dummy file" > src/main.rs
 RUN rustup target add x86_64-unknown-linux-musl
