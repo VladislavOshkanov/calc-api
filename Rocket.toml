@@ -1,8 +1,17 @@
-[default.databases.openapi_mongo]
-url = "mongodb://mongo:27017"
-
-
 [default]
-address = "0.0.0.0"
-port = 8000
-log_level="debug"
+# Настройки сервера по умолчанию
+address = "0.0.0.0"     # Сервер доступен из любой сети
+port = 8000             # Порт по умолчанию
+log_level = "debug"     # Уровень логирования
+
+[default.databases.openapi_mongo]
+url = "mongodb://mongo:27017" # Подключение к MongoDB (по умолчанию для контейнера)
+
+[local]
+# Локальные настройки сервера
+address = "127.0.0.1"   # Сервер доступен только на локальной машине
+port = 8080             # Локальный порт
+log_level = "normal"      # Уровень логирования для локального окружения
+
+[local.databases.openapi_mongo]
+url = "mongodb://localhost:27017" # Подключение к локальной MongoDB
