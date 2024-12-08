@@ -1,6 +1,6 @@
 use rocket_db_pools::Connection;
 use mongodb::bson::oid::ObjectId;
-use crate::place::Place;
+use crate::model::Place;
 use mongodb::bson::doc;
 use crate::DB;
 

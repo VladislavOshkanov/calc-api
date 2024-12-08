@@ -1,5 +1,9 @@
-pub mod add_place;
-pub mod get_places;
-pub mod get_place;
-pub mod update_place;
-pub mod delete_place;
+// Подключение модулей контроллеров
+pub mod place;
+pub mod power;
+pub mod kbm;
+
+// Экспорт часто используемых маршрутов (опционально)
+pub use place::*;
+pub use power::*;
+pub use kbm::*;

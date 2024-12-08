@@ -1,6 +1,6 @@
 use rocket::serde::json::Json;
 use rocket_db_pools::Connection;
-use crate::place::Place;
+use crate::model::Place;
 use crate::DB;
 
 /// POST-эндпоинт для добавления нового объекта "Place".

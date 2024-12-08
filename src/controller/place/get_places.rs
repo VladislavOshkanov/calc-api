@@ -1,7 +1,7 @@
 use rocket::serde::json::Json;
 use rocket_db_pools::Connection;
 use futures::stream::TryStreamExt;
-use crate::place::Place;
+use crate::model::Place;
 use crate::DB;
 
 /// GET-эндпоинт для получения списка всех объектов "Place".

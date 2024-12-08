@@ -2,7 +2,7 @@ use rocket::serde::json::Json;
 use rocket_db_pools::Connection;
 use mongodb::bson::oid::ObjectId;
 use mongodb::bson::doc;
-use crate::place::Place;
+use crate::model::Place;
 use crate::DB;
 
 /// GET-эндпоинт для получения одного объекта "Place" по ID.
