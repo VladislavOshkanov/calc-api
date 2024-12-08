@@ -7,7 +7,7 @@ use futures::TryStreamExt;
 use std::sync::Arc;
 use crate::{AppState, model::Kbm};
 
-/// POST-эндпоинт для добавления нового объекта "Kbm".
+/// POST-эндпоинт для добавления нового объекта "KBM".
 pub async fn add_kbm(
     State(state): State<Arc<AppState>>,
     Json(kbm): Json<Kbm>,
