@@ -1,54 +1,58 @@
 mod controller;
 mod model;
+mod auth;
 
-#[macro_use] extern crate rocket;
+use axum::{
+    routing::{get, post}, Router, middleware
+};
+use mongodb::Client;
+use std::sync::Arc;
+use std::net::SocketAddr;
+use crate::controller::place::*;
+use crate::controller::power::*;
+use crate::controller::kbm::*;
 
-use rocket_db_pools::Database;
-use rocket_db_pools::mongodb;
+use crate::auth::auth_middleware::admin_auth;
 
-use crate::controller::add_place::add_place;
-use crate::controller::delete_place::delete_place;
-use crate::controller::get_place::get_place;
-use crate::controller::get_places::get_places;
-use crate::controller::update_place::update_place;
 
-use crate::controller::add_kbm::add_kbm;
-use crate::controller::delete_kbm::delete_kbm;
-use crate::controller::get_kbm::get_kbm;
-use crate::controller::get_kbms::get_kbms;
-use crate::controller::update_kbm::update_kbm;
+struct AppState {
+    db_client: Client
+}
 
-use crate::controller::add_power::add_power;
-use crate::controller::delete_power::delete_power;
-use crate::controller::get_power::get_power;
-use crate::controller::get_powers::get_powers;
-use crate::controller::update_power::update_power;
+#[tokio::main]
+async fn main() {
+    // Подключение к базе данных MongoDB
+    let db_client = Client::with_uri_str("mongodb://localhost:27017")
+        .await
+        .expect("Failed to initialize MongoDB client.");
 
-/// Определение базы данных Rocket с использованием MongoDB.
-#[derive(Database)]
-#[database("openapi_mongo")]
-struct DB(mongodb::Client);
+    // Настройка состояния приложения
+    let shared_state = Arc::new(AppState { db_client });
 
-/// Главная функция запуска приложения.
-#[rocket::main]
-async fn main() -> Result<(), rocket::Error> {
-    println!("Starting Rocket application...");
+    let admin_routes = Router::new()
+        // Place маршруты
+        .route("/admin/place", post(add_place).get(get_places))
+        .route("/admin/place/:id", get(get_place).put(update_place).delete(delete_place))
+        // Power маршруты
+        .route("/admin/power", post(add_power).get(get_powers))
+        .route("/admin/power/:id", get(get_power).put(update_power).delete(delete_power))
+        // Kbm маршруты
+        .route("/admin/kbm", post(add_kbm).get(get_kbms))
+        .route("/admin/kbm/:id", get(get_kbm).put(update_kbm).delete(delete_kbm))
+        // Применяем middleware к каждому запросу
+        .layer(middleware::from_fn(admin_auth));
 
-    let _rocket = rocket::build()
-        .attach(DB::init())
-        .mount(
-            "/",
-            routes![
-                // Place endpoints
-                add_place, get_places, get_place, update_place, delete_place,
-                // Power endpoints
-                add_power, get_powers, get_power, update_power, delete_power,
-                // KBM endpoints
-                add_kbm, get_kbms, get_kbm, update_kbm, delete_kbm
-            ],
-        )
-        .launch()
-        .await?;
+    // Настройка маршрутов
+    let router = Router::new()
+        .merge(admin_routes)
+        .with_state(shared_state);
 
-    Ok(())
+
+    // Запуск сервера
+    let addr = SocketAddr::from(([127, 0, 0, 1], 8000));
+    println!("Server running on {}", addr);
+    axum_server::bind(addr)
+        .serve(router.into_make_service())
+        .await
+        .unwrap();
 }
