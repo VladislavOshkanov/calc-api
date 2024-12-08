@@ -21,8 +21,8 @@
 
 1. Клонируйте репозиторий:
    ```bash
-   git clone https://github.com/your-repo/osa-api.git
-   cd osa-api
+   git clone https://github.com/VladislavOshkanov/calc-api.git
+   cd calc-api
    ```
 
 2. Настройте MongoDB:
@@ -259,13 +259,3 @@ Authorization: Bearer secret-token
 ## Лицензия
 
 Этот проект лицензирован под MIT License - см. файл [LICENSE](LICENSE) для подробностей.
-```
-
-Этот `README.md` содержит:
-
-- Общее описание проекта и его назначения.
-- Шаги по установке и запуску.
-- Примеры API-запросов с использованием `curl`.
-- Информацию об авторизации для админских эндпоинтов.
-
-Не забудьте заменить `secret-token` на фактический токен, который вы используете для авторизации.
