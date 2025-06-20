@@ -5,22 +5,33 @@ use axum::{
 use mongodb::bson::{doc, oid::ObjectId};
 use futures::TryStreamExt;
 use std::sync::Arc;
-use crate::{AppState, model::Power};
+use crate::{AppState};
+use crate::model::power::{Power, CreatePower};
 
 /// POST-эндпоинт для добавления нового объекта "Power".
 pub async fn add_power(
     State(state): State<Arc<AppState>>,
-    Json(power): Json<Power>,
+    Json(create_power): Json<CreatePower>,
 ) -> Json<Power> {
     let client = &state.db_client;
     let collection = client.database("openapi").collection("powers");
 
-    collection
+    let power = Power {
+        id: None,
+        min_power: create_power.min_power,
+        max_power: create_power.max_power,
+        coefficent: create_power.coefficent,
+    };
+
+    let result = collection
         .insert_one(power.clone(), None)
         .await
         .expect("Failed to insert power.");
 
-    Json(power)
+    let mut power_with_id = power;
+    power_with_id.id = Some(result.inserted_id.as_object_id().unwrap());
+
+    Json(power_with_id)
 }
 
 /// GET-эндпоинт для получения списка всех объектов "Power".

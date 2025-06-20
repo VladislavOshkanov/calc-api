@@ -5,22 +5,32 @@ use axum::{
 use mongodb::bson::{doc, oid::ObjectId};
 use futures::TryStreamExt;
 use std::sync::Arc;
-use crate::{AppState, model::Kbm};
+use crate::{AppState};
+use crate::model::kbm::{Kbm, CreateKbm};
 
 /// POST-эндпоинт для добавления нового объекта "KBM".
 pub async fn add_kbm(
     State(state): State<Arc<AppState>>,
-    Json(kbm): Json<Kbm>,
+    Json(create_kbm): Json<CreateKbm>,
 ) -> Json<Kbm> {
     let client = &state.db_client;
     let collection = client.database("openapi").collection("kbms");
 
-    collection
+    let kbm = Kbm {
+        id: None,
+        coefficient: create_kbm.coefficient,
+        class: create_kbm.class,
+    };
+
+    let result = collection
         .insert_one(kbm.clone(), None)
         .await
         .expect("Failed to insert kbm.");
 
-    Json(kbm)
+    let mut kbm_with_id = kbm;
+    kbm_with_id.id = Some(result.inserted_id.as_object_id().unwrap());
+
+    Json(kbm_with_id)
 }
 
 /// GET-эндпоинт для получения списка всех объектов "Kbm".

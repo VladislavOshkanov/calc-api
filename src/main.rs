@@ -11,6 +11,9 @@ use std::net::SocketAddr;
 use crate::controller::place::*;
 use crate::controller::power::*;
 use crate::controller::kbm::*;
+use crate::controller::age_experience::*;
+use crate::controller::season::*;
+use crate::controller::limitation::*;
 
 use crate::auth::auth_middleware::admin_auth;
 
@@ -39,6 +42,15 @@ async fn main() {
         // Kbm маршруты
         .route("/admin/kbm", post(add_kbm).get(get_kbms))
         .route("/admin/kbm/:id", get(get_kbm).put(update_kbm).delete(delete_kbm))
+        // AgeExperience маршруты
+        .route("/admin/age_experience", post(add_age_experience).get(get_age_experiences))
+        .route("/admin/age_experience/:id", get(get_age_experience).put(update_age_experience).delete(delete_age_experience))
+        // Season маршруты
+        .route("/admin/season", post(add_season).get(get_seasons))
+        .route("/admin/season/:id", get(get_season).put(update_season).delete(delete_season))
+        // Limitation маршруты
+        .route("/admin/limitation", post(add_limitation).get(get_limitations))
+        .route("/admin/limitation/:id", get(get_limitation).put(update_limitation).delete(delete_limitation))
         // Применяем middleware к каждому запросу
         .layer(middleware::from_fn(admin_auth));
 

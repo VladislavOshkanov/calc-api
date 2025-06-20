@@ -1,23 +1,33 @@
 use axum::{Json, extract::{Path, State}};
 use mongodb::bson::{doc, oid::ObjectId};
 use std::sync::Arc;
-use crate::{AppState, model::Place};
+use crate::{AppState};
+use crate::model::place::{Place, CreatePlace};
 use futures::TryStreamExt;
 
 /// POST-эндпоинт для добавления нового объекта "Place".
 pub async fn add_place(
     State(state): State<Arc<AppState>>,
-    Json(place): Json<Place>,
+    Json(create_place): Json<CreatePlace>,
 ) -> Json<Place> {
     let client = &state.db_client;
     let collection = client.database("openapi").collection("places");
 
-    collection
+    let place = Place {
+        id: None,
+        name: create_place.name,
+        coefficent: create_place.coefficent,
+    };
+
+    let result = collection
         .insert_one(place.clone(), None)
         .await
         .expect("Failed to insert place.");
 
-    Json(place)
+    let mut place_with_id = place;
+    place_with_id.id = Some(result.inserted_id.as_object_id().unwrap());
+
+    Json(place_with_id)
 }
 
 /// GET-эндпоинт для получения списка всех объектов "Place".
