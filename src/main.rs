@@ -14,6 +14,8 @@ use crate::controller::kbm::*;
 use crate::controller::age_experience::*;
 use crate::controller::season::*;
 use crate::controller::limitation::*;
+use crate::controller::base_price::*;
+use crate::controller::coefficient_calculator::*;
 
 use crate::auth::auth_middleware::admin_auth;
 
@@ -51,6 +53,11 @@ async fn main() {
         // Limitation маршруты
         .route("/admin/limitation", post(add_limitation).get(get_limitations))
         .route("/admin/limitation/:id", get(get_limitation).put(update_limitation).delete(delete_limitation))
+        // BasePrice маршруты
+        .route("/admin/base_price", post(add_base_price).get(get_base_prices))
+        .route("/admin/base_price/:id", get(get_base_price).put(update_base_price).delete(delete_base_price))
+        // Coefficient Calculator маршрут
+        .route("/admin/calculate-coefficient", post(calculate_coefficient))
         // Применяем middleware к каждому запросу
         .layer(middleware::from_fn(admin_auth));
 
