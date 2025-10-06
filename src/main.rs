@@ -1,10 +1,14 @@
 mod controller;
+use crate::controller::all_models::*;
 mod model;
 mod auth;
 
 use axum::{
-    routing::{get, post}, Router, middleware
+    routing::{get, post}, Router, middleware, http::StatusCode
 };
+use axum::extract::Path;
+use axum::response::Html;
+use tokio::fs;
 use mongodb::Client;
 use std::sync::Arc;
 use std::net::SocketAddr;
@@ -56,13 +60,16 @@ async fn main() {
         // BasePrice маршруты
         .route("/admin/base_price", post(add_base_price).get(get_base_prices))
         .route("/admin/base_price/:id", get(get_base_price).put(update_base_price).delete(delete_base_price))
-        // Coefficient Calculator маршрут
-        .route("/admin/calculate-coefficient", post(calculate_coefficient))
         // Применяем middleware к каждому запросу
         .layer(middleware::from_fn(admin_auth));
 
     // Настройка маршрутов
     let router = Router::new()
+        .route("/api/all-models", get(get_all_models))
+        .route("/api/calculate-coefficient", post(calculate_coefficient))
+        // Serve index.html at root
+        .route("/", get(root))
+        .route("/static/*file", get(static_files))
         .merge(admin_routes)
         .with_state(shared_state);
 
@@ -74,4 +81,18 @@ async fn main() {
         .serve(router.into_make_service())
         .await
         .unwrap();
+}
+
+async fn root() -> Result<Html<String>, (StatusCode, String)> {
+    let content = fs::read_to_string("./static/index.html").await.map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, format!("read error: {}", e)))?;
+    Ok(Html(content))
+}
+
+async fn static_files(Path(file): Path<String>) -> Result<(axum::http::HeaderMap, Vec<u8>), (StatusCode, String)> {
+    let path = format!("static/{}", file);
+    let data = fs::read(&path).await.map_err(|e| (StatusCode::NOT_FOUND, format!("not found: {}", e)))?;
+    let mut headers = axum::http::HeaderMap::new();
+    let mime = mime_guess::from_path(&path).first_or_octet_stream();
+    headers.insert(axum::http::header::CONTENT_TYPE, axum::http::HeaderValue::from_str(mime.as_ref()).unwrap());
+    Ok((headers, data))
 }

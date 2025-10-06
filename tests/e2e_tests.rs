@@ -40,7 +40,7 @@ impl TestClient {
 
         let response = self
             .client
-            .post(&format!("{}/admin/place", self.base_url))
+            .post(format!("{}/admin/place", self.base_url))
             .json(&place_data)
             .send()
             .await?;
@@ -52,7 +52,7 @@ impl TestClient {
     async fn get_places(&self) -> Result<Vec<serde_json::Value>> {
         let response = self
             .client
-            .get(&format!("{}/admin/place", self.base_url))
+            .get(format!("{}/admin/place", self.base_url))
             .send()
             .await?;
 
@@ -63,7 +63,7 @@ impl TestClient {
     async fn get_place(&self, id: &str) -> Result<serde_json::Value> {
         let response = self
             .client
-            .get(&format!("{}/admin/place/{}", self.base_url, id))
+            .get(format!("{}/admin/place/{}", self.base_url, id))
             .send()
             .await?;
 
@@ -79,7 +79,7 @@ impl TestClient {
 
         let response = self
             .client
-            .put(&format!("{}/admin/place/{}", self.base_url, id))
+            .put(format!("{}/admin/place/{}", self.base_url, id))
             .json(&place_data)
             .send()
             .await?;
@@ -91,7 +91,7 @@ impl TestClient {
     async fn delete_place(&self, id: &str) -> Result<()> {
         let response = self
             .client
-            .delete(&format!("{}/admin/place/{}", self.base_url, id))
+            .delete(format!("{}/admin/place/{}", self.base_url, id))
             .send()
             .await?;
 
@@ -109,7 +109,7 @@ impl TestClient {
 
         let response = self
             .client
-            .post(&format!("{}/admin/power", self.base_url))
+            .post(format!("{}/admin/power", self.base_url))
             .json(&power_data)
             .send()
             .await?;
@@ -121,7 +121,7 @@ impl TestClient {
     async fn get_powers(&self) -> Result<Vec<serde_json::Value>> {
         let response = self
             .client
-            .get(&format!("{}/admin/power", self.base_url))
+            .get(format!("{}/admin/power", self.base_url))
             .send()
             .await?;
 
@@ -132,7 +132,7 @@ impl TestClient {
     async fn get_power(&self, id: &str) -> Result<serde_json::Value> {
         let response = self
             .client
-            .get(&format!("{}/admin/power/{}", self.base_url, id))
+            .get(format!("{}/admin/power/{}", self.base_url, id))
             .send()
             .await?;
 
@@ -149,7 +149,7 @@ impl TestClient {
 
         let response = self
             .client
-            .put(&format!("{}/admin/power/{}", self.base_url, id))
+            .put(format!("{}/admin/power/{}", self.base_url, id))
             .json(&power_data)
             .send()
             .await?;
@@ -161,7 +161,7 @@ impl TestClient {
     async fn delete_power(&self, id: &str) -> Result<()> {
         let response = self
             .client
-            .delete(&format!("{}/admin/power/{}", self.base_url, id))
+            .delete(format!("{}/admin/power/{}", self.base_url, id))
             .send()
             .await?;
 
@@ -178,7 +178,7 @@ impl TestClient {
 
         let response = self
             .client
-            .post(&format!("{}/admin/kbm", self.base_url))
+            .post(format!("{}/admin/kbm", self.base_url))
             .json(&kbm_data)
             .send()
             .await?;
@@ -190,7 +190,7 @@ impl TestClient {
     async fn get_kbms(&self) -> Result<Vec<serde_json::Value>> {
         let response = self
             .client
-            .get(&format!("{}/admin/kbm", self.base_url))
+            .get(format!("{}/admin/kbm", self.base_url))
             .send()
             .await?;
 
@@ -201,7 +201,7 @@ impl TestClient {
     async fn get_kbm(&self, id: &str) -> Result<serde_json::Value> {
         let response = self
             .client
-            .get(&format!("{}/admin/kbm/{}", self.base_url, id))
+            .get(format!("{}/admin/kbm/{}", self.base_url, id))
             .send()
             .await?;
 
@@ -217,7 +217,7 @@ impl TestClient {
 
         let response = self
             .client
-            .put(&format!("{}/admin/kbm/{}", self.base_url, id))
+            .put(format!("{}/admin/kbm/{}", self.base_url, id))
             .json(&kbm_data)
             .send()
             .await?;
@@ -229,7 +229,7 @@ impl TestClient {
     async fn delete_kbm(&self, id: &str) -> Result<()> {
         let response = self
             .client
-            .delete(&format!("{}/admin/kbm/{}", self.base_url, id))
+            .delete(format!("{}/admin/kbm/{}", self.base_url, id))
             .send()
             .await?;
 
@@ -247,7 +247,7 @@ impl TestClient {
 
         let response = self
             .client
-            .post(&format!("{}/admin/age_experience", self.base_url))
+            .post(format!("{}/admin/age_experience", self.base_url))
             .json(&age_experience_data)
             .send()
             .await?;
@@ -259,7 +259,7 @@ impl TestClient {
     async fn get_age_experiences(&self) -> Result<Vec<serde_json::Value>> {
         let response = self
             .client
-            .get(&format!("{}/admin/age_experience", self.base_url))
+            .get(format!("{}/admin/age_experience", self.base_url))
             .send()
             .await?;
 
@@ -270,7 +270,7 @@ impl TestClient {
     async fn get_age_experience(&self, id: &str) -> Result<serde_json::Value> {
         let response = self
             .client
-            .get(&format!("{}/admin/age_experience/{}", self.base_url, id))
+            .get(format!("{}/admin/age_experience/{}", self.base_url, id))
             .send()
             .await?;
 
@@ -287,7 +287,7 @@ impl TestClient {
 
         let response = self
             .client
-            .put(&format!("{}/admin/age_experience/{}", self.base_url, id))
+            .put(format!("{}/admin/age_experience/{}", self.base_url, id))
             .json(&age_experience_data)
             .send()
             .await?;
@@ -299,7 +299,7 @@ impl TestClient {
     async fn delete_age_experience(&self, id: &str) -> Result<()> {
         let response = self
             .client
-            .delete(&format!("{}/admin/age_experience/{}", self.base_url, id))
+            .delete(format!("{}/admin/age_experience/{}", self.base_url, id))
             .send()
             .await?;
 
@@ -316,7 +316,7 @@ impl TestClient {
 
         let response = self
             .client
-            .post(&format!("{}/admin/season", self.base_url))
+            .post(format!("{}/admin/season", self.base_url))
             .json(&season_data)
             .send()
             .await?;
@@ -328,7 +328,7 @@ impl TestClient {
     async fn get_seasons(&self) -> Result<Vec<serde_json::Value>> {
         let response = self
             .client
-            .get(&format!("{}/admin/season", self.base_url))
+            .get(format!("{}/admin/season", self.base_url))
             .send()
             .await?;
 
@@ -339,7 +339,7 @@ impl TestClient {
     async fn get_season(&self, id: &str) -> Result<serde_json::Value> {
         let response = self
             .client
-            .get(&format!("{}/admin/season/{}", self.base_url, id))
+            .get(format!("{}/admin/season/{}", self.base_url, id))
             .send()
             .await?;
 
@@ -355,7 +355,7 @@ impl TestClient {
 
         let response = self
             .client
-            .put(&format!("{}/admin/season/{}", self.base_url, id))
+            .put(format!("{}/admin/season/{}", self.base_url, id))
             .json(&season_data)
             .send()
             .await?;
@@ -367,7 +367,7 @@ impl TestClient {
     async fn delete_season(&self, id: &str) -> Result<()> {
         let response = self
             .client
-            .delete(&format!("{}/admin/season/{}", self.base_url, id))
+            .delete(format!("{}/admin/season/{}", self.base_url, id))
             .send()
             .await?;
 
@@ -384,7 +384,7 @@ impl TestClient {
 
         let response = self
             .client
-            .post(&format!("{}/admin/limitation", self.base_url))
+            .post(format!("{}/admin/limitation", self.base_url))
             .json(&limitation_data)
             .send()
             .await?;
@@ -396,7 +396,7 @@ impl TestClient {
     async fn get_limitations(&self) -> Result<Vec<serde_json::Value>> {
         let response = self
             .client
-            .get(&format!("{}/admin/limitation", self.base_url))
+            .get(format!("{}/admin/limitation", self.base_url))
             .send()
             .await?;
 
@@ -407,7 +407,7 @@ impl TestClient {
     async fn get_limitation(&self, id: &str) -> Result<serde_json::Value> {
         let response = self
             .client
-            .get(&format!("{}/admin/limitation/{}", self.base_url, id))
+            .get(format!("{}/admin/limitation/{}", self.base_url, id))
             .send()
             .await?;
 
@@ -423,7 +423,7 @@ impl TestClient {
 
         let response = self
             .client
-            .put(&format!("{}/admin/limitation/{}", self.base_url, id))
+            .put(format!("{}/admin/limitation/{}", self.base_url, id))
             .json(&limitation_data)
             .send()
             .await?;
@@ -435,7 +435,7 @@ impl TestClient {
     async fn delete_limitation(&self, id: &str) -> Result<()> {
         let response = self
             .client
-            .delete(&format!("{}/admin/limitation/{}", self.base_url, id))
+            .delete(format!("{}/admin/limitation/{}", self.base_url, id))
             .send()
             .await?;
 
@@ -613,7 +613,7 @@ async fn test_unauthorized_access() -> Result<()> {
         .unwrap();
 
     let response = client
-        .get(&format!("{}/admin/place", BASE_URL))
+        .get(format!("{}/admin/place", BASE_URL))
         .send()
         .await?;
 
@@ -635,7 +635,7 @@ async fn test_invalid_token() -> Result<()> {
         .unwrap();
 
     let response = client
-        .get(&format!("{}/admin/place", BASE_URL))
+        .get(format!("{}/admin/place", BASE_URL))
         .send()
         .await?;
 

@@ -14,7 +14,7 @@ async fn test_auth_middleware() -> Result<()> {
         .unwrap();
 
     let response = client
-        .get(&format!("{}/admin/place", BASE_URL))
+        .get(format!("{}/admin/place", BASE_URL))
         .send()
         .await?;
 
@@ -32,7 +32,7 @@ async fn test_auth_middleware() -> Result<()> {
         .unwrap();
 
     let response = client_with_wrong_token
-        .get(&format!("{}/admin/place", BASE_URL))
+        .get(format!("{}/admin/place", BASE_URL))
         .send()
         .await?;
 
@@ -50,7 +50,7 @@ async fn test_auth_middleware() -> Result<()> {
         .unwrap();
 
     let response = client_with_correct_token
-        .get(&format!("{}/admin/place", BASE_URL))
+        .get(format!("{}/admin/place", BASE_URL))
         .send()
         .await?;
 

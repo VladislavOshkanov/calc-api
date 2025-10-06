@@ -7,3 +7,4 @@ pub mod season;
 pub mod limitation;
 pub mod base_price;
 pub mod coefficient_calculator;
+pub mod all_models;

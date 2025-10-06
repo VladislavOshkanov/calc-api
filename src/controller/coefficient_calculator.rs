@@ -103,8 +103,9 @@ pub async fn calculate_coefficient(
         .await
         .map_err(|e| format!("Failed to fetch place: {}", e))?
         .ok_or("Place not found")?;
-    let place_coeff = place_doc["coefficent"] // Обратите внимание на опечатку в модели Place
-        .as_f64()
+    // Some records may have typo 'coefficent', try both keys
+    let place_coeff = place_doc.get("coefficient").and_then(|v| v.as_f64())
+        .or_else(|| place_doc.get("coefficent").and_then(|v| v.as_f64()))
         .ok_or("Invalid coefficient in place")?;
 
     // Получение коэффициента из Power
@@ -115,8 +116,9 @@ pub async fn calculate_coefficient(
         .await
         .map_err(|e| format!("Failed to fetch power: {}", e))?
         .ok_or("Power not found")?;
-    let power_coeff = power_doc["coefficent"] // Обратите внимание на опечатку в модели Power
-        .as_f64()
+    // Support both 'coefficient' and common typo 'coefficent'
+    let power_coeff = power_doc.get("coefficient").and_then(|v| v.as_f64())
+        .or_else(|| power_doc.get("coefficent").and_then(|v| v.as_f64()))
         .ok_or("Invalid coefficient in power")?;
 
     // Получение коэффициента из Season
