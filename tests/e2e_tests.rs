@@ -451,7 +451,9 @@ async fn test_place_crud() -> Result<()> {
     // Create
     let created_place = client.create_place().await?;
     println!("created_place: {:?}", created_place);
-    let place_id = created_place["_id"]["$oid"].as_str().expect("Place ID should be present");
+    let place_id = created_place["_id"]["$oid"]
+        .as_str()
+        .expect("Place ID should be present");
 
     // Read all
     let places = client.get_places().await?;
@@ -477,7 +479,9 @@ async fn test_power_crud() -> Result<()> {
 
     // Create
     let created_power = client.create_power().await?;
-    let power_id = created_power["_id"]["$oid"].as_str().expect("Power ID should be present");
+    let power_id = created_power["_id"]["$oid"]
+        .as_str()
+        .expect("Power ID should be present");
 
     // Read all
     let powers = client.get_powers().await?;
@@ -503,7 +507,9 @@ async fn test_kbm_crud() -> Result<()> {
 
     // Create
     let created_kbm = client.create_kbm().await?;
-    let kbm_id = created_kbm["_id"]["$oid"].as_str().expect("KBM ID should be present");
+    let kbm_id = created_kbm["_id"]["$oid"]
+        .as_str()
+        .expect("KBM ID should be present");
 
     // Read all
     let kbms = client.get_kbms().await?;
@@ -529,7 +535,9 @@ async fn test_age_experience_crud() -> Result<()> {
 
     // Create
     let created_age_experience = client.create_age_experience().await?;
-    let age_experience_id = created_age_experience["_id"]["$oid"].as_str().expect("AgeExperience ID should be present");
+    let age_experience_id = created_age_experience["_id"]["$oid"]
+        .as_str()
+        .expect("AgeExperience ID should be present");
 
     // Read all
     let age_experiences = client.get_age_experiences().await?;
@@ -555,7 +563,9 @@ async fn test_season_crud() -> Result<()> {
 
     // Create
     let created_season = client.create_season().await?;
-    let season_id = created_season["_id"]["$oid"].as_str().expect("Season ID should be present");
+    let season_id = created_season["_id"]["$oid"]
+        .as_str()
+        .expect("Season ID should be present");
 
     // Read all
     let seasons = client.get_seasons().await?;
@@ -581,7 +591,9 @@ async fn test_limitation_crud() -> Result<()> {
 
     // Create
     let created_limitation = client.create_limitation().await?;
-    let limitation_id = created_limitation["_id"]["$oid"].as_str().expect("Limitation ID should be present");
+    let limitation_id = created_limitation["_id"]["$oid"]
+        .as_str()
+        .expect("Limitation ID should be present");
 
     // Read all
     let limitations = client.get_limitations().await?;
@@ -642,4 +654,4 @@ async fn test_invalid_token() -> Result<()> {
     assert_eq!(response.status(), reqwest::StatusCode::UNAUTHORIZED);
 
     Ok(())
-} 
+}

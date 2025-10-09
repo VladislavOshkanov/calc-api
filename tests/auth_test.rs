@@ -41,7 +41,10 @@ async fn test_auth_middleware() -> Result<()> {
 
     // Тест 3: Запрос с правильным токеном должен пройти
     let mut headers = reqwest::header::HeaderMap::new();
-    headers.insert("Authorization", format!("Bearer {}", ADMIN_TOKEN).parse().unwrap());
+    headers.insert(
+        "Authorization",
+        format!("Bearer {}", ADMIN_TOKEN).parse().unwrap(),
+    );
 
     let client_with_correct_token = Client::builder()
         .default_headers(headers)
@@ -59,4 +62,4 @@ async fn test_auth_middleware() -> Result<()> {
     assert_ne!(response.status(), reqwest::StatusCode::UNAUTHORIZED);
 
     Ok(())
-} 
+}

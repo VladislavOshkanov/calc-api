@@ -1,9 +1,12 @@
-use axum::{Json, extract::{Path, State}};
+use crate::model::season::{CreateSeason, Season};
+use crate::AppState;
+use axum::{
+    extract::{Path, State},
+    Json,
+};
+use futures::TryStreamExt;
 use mongodb::bson::{doc, oid::ObjectId};
 use std::sync::Arc;
-use crate::{AppState};
-use crate::model::season::{Season, CreateSeason};
-use futures::TryStreamExt;
 
 pub async fn add_season(
     State(state): State<Arc<AppState>>,
@@ -33,7 +36,10 @@ pub async fn get_seasons(State(state): State<Arc<AppState>>) -> Json<Vec<Season>
     let client = &state.db_client;
     let collection = client.database("openapi").collection::<Season>("seasons");
 
-    let mut cursor = collection.find(None, None).await.expect("Failed to fetch seasons");
+    let mut cursor = collection
+        .find(None, None)
+        .await
+        .expect("Failed to fetch seasons");
 
     let mut seasons = Vec::new();
     while let Some(doc) = cursor.try_next().await.expect("Error fetching document") {
@@ -99,4 +105,4 @@ pub async fn delete_season(
         Ok(_) => Err("Season not found.".to_string()),
         Err(err) => Err(format!("Failed to delete season: {err}")),
     }
-} 
+}

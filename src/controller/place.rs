@@ -1,9 +1,12 @@
-use axum::{Json, extract::{Path, State}};
+use crate::model::place::{CreatePlace, Place};
+use crate::AppState;
+use axum::{
+    extract::{Path, State},
+    Json,
+};
+use futures::TryStreamExt;
 use mongodb::bson::{doc, oid::ObjectId};
 use std::sync::Arc;
-use crate::{AppState};
-use crate::model::place::{Place, CreatePlace};
-use futures::TryStreamExt;
 
 /// POST-эндпоинт для добавления нового объекта "Place".
 pub async fn add_place(
@@ -35,7 +38,10 @@ pub async fn get_places(State(state): State<Arc<AppState>>) -> Json<Vec<Place>> 
     let client = &state.db_client;
     let collection = client.database("openapi").collection::<Place>("places");
 
-    let mut cursor = collection.find(None, None).await.expect("Failed to fetch places");
+    let mut cursor = collection
+        .find(None, None)
+        .await
+        .expect("Failed to fetch places");
 
     let mut places = Vec::new();
     while let Some(doc) = cursor.try_next().await.expect("Error fetching document") {
@@ -44,7 +50,6 @@ pub async fn get_places(State(state): State<Arc<AppState>>) -> Json<Vec<Place>> 
 
     Json(places)
 }
-
 
 /// GET-эндпоинт для получения объекта Place по ID.
 pub async fn get_place(

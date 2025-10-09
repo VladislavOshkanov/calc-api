@@ -1,12 +1,12 @@
+use crate::model::base_price::{BasePrice, CreateBasePrice};
+use crate::AppState;
 use axum::{
     extract::{Path, State},
     Json,
 };
-use mongodb::bson::{doc, oid::ObjectId, DateTime};
 use futures::TryStreamExt;
+use mongodb::bson::{doc, oid::ObjectId, DateTime};
 use std::sync::Arc;
-use crate::AppState;
-use crate::model::base_price::{BasePrice, CreateBasePrice};
 
 /// POST-эндпоинт для добавления нового объекта "BasePrice".
 pub async fn add_base_price(
@@ -37,9 +37,14 @@ pub async fn add_base_price(
 /// GET-эндпоинт для получения списка всех объектов "BasePrice".
 pub async fn get_base_prices(State(state): State<Arc<AppState>>) -> Json<Vec<BasePrice>> {
     let client = &state.db_client;
-    let collection = client.database("openapi").collection::<BasePrice>("base_prices");
+    let collection = client
+        .database("openapi")
+        .collection::<BasePrice>("base_prices");
 
-    let mut cursor = collection.find(None, None).await.expect("Failed to fetch base_prices");
+    let mut cursor = collection
+        .find(None, None)
+        .await
+        .expect("Failed to fetch base_prices");
 
     let mut base_prices = Vec::new();
     while let Some(doc) = cursor.try_next().await.expect("Error fetching document") {
@@ -55,7 +60,9 @@ pub async fn get_base_price(
     Path(id): Path<String>,
 ) -> Result<Json<BasePrice>, String> {
     let client = &state.db_client;
-    let collection = client.database("openapi").collection::<BasePrice>("base_prices");
+    let collection = client
+        .database("openapi")
+        .collection::<BasePrice>("base_prices");
 
     let object_id = ObjectId::parse_str(&id).map_err(|_| "Invalid ID format".to_string())?;
     let filter = doc! { "_id": object_id };
@@ -74,7 +81,9 @@ pub async fn update_base_price(
     Json(base_price): Json<BasePrice>,
 ) -> Result<Json<BasePrice>, String> {
     let client = &state.db_client;
-    let collection = client.database("openapi").collection::<BasePrice>("base_prices");
+    let collection = client
+        .database("openapi")
+        .collection::<BasePrice>("base_prices");
 
     let object_id = ObjectId::parse_str(&id).map_err(|_| "Invalid ID format".to_string())?;
     let filter = doc! { "_id": object_id };
@@ -98,7 +107,9 @@ pub async fn delete_base_price(
     Path(id): Path<String>,
 ) -> Result<String, String> {
     let client = &state.db_client;
-    let collection = client.database("openapi").collection::<BasePrice>("base_prices");
+    let collection = client
+        .database("openapi")
+        .collection::<BasePrice>("base_prices");
 
     let object_id = ObjectId::parse_str(&id).map_err(|_| "Invalid ID format".to_string())?;
     let filter = doc! { "_id": object_id };

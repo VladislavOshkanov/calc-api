@@ -16,6 +16,34 @@
         <button id="calculate">Calculate</button>
         <div id="result" class="result"></div>
     </div>
+
+    <hr />
+    <div class="container">
+        <h2>Admin Panel</h2>
+        <div class="card">
+            <label>Admin Token: <input id="admin_token" type="password" placeholder="Bearer token"/></label>
+            <select id="admin_model_type">
+                <option value="place">Place</option>
+                <option value="power">Power</option>
+                <option value="kbm">KBM</option>
+                <option value="age_experience">Age Experience</option>
+                <option value="season">Season</option>
+                <option value="limitation">Limitation</option>
+                <option value="base_price">Base Price</option>
+            </select>
+            <button id="admin_refresh">Refresh</button>
+            <div id="admin_list"></div>
+            <h3>Create / Update</h3>
+            <textarea id="admin_payload" rows="6" cols="60" placeholder='Enter JSON payload, e.g. {"name":"Moscow","coefficent":1.5}'></textarea>
+            <br/>
+            <input id="admin_item_id" placeholder="id (for update/delete)" />
+            <br/>
+            <button id="admin_create">Create</button>
+            <button id="admin_update">Update</button>
+            <button id="admin_delete">Delete</button>
+            <div id="admin_status"></div>
+        </div>
+    </div>
 </div>
 <script src="/static/app.js"></script>
 </body>

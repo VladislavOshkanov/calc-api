@@ -1,12 +1,12 @@
+use crate::model::power::{CreatePower, Power};
+use crate::AppState;
 use axum::{
     extract::{Path, State},
     Json,
 };
-use mongodb::bson::{doc, oid::ObjectId};
 use futures::TryStreamExt;
+use mongodb::bson::{doc, oid::ObjectId};
 use std::sync::Arc;
-use crate::{AppState};
-use crate::model::power::{Power, CreatePower};
 
 /// POST-эндпоинт для добавления нового объекта "Power".
 pub async fn add_power(
@@ -39,7 +39,10 @@ pub async fn get_powers(State(state): State<Arc<AppState>>) -> Json<Vec<Power>> 
     let client = &state.db_client;
     let collection = client.database("openapi").collection::<Power>("powers");
 
-    let mut cursor = collection.find(None, None).await.expect("Failed to fetch powers");
+    let mut cursor = collection
+        .find(None, None)
+        .await
+        .expect("Failed to fetch powers");
 
     let mut powers = Vec::new();
     while let Some(doc) = cursor.try_next().await.expect("Error fetching document") {

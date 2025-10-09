@@ -1,35 +1,37 @@
-name: Docker Image CI
+name: CI - build and test
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["main", "master"]
   pull_request:
-    branches: [ "master" ]
-
-
-env:
-  CR_URI: calc-api.cr.cloud.ru
+    branches: ["main", "master"]
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4
-
-    - name: Log in to Evolution Artifact Registry
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ env.CR_URI }}
-        username: ${{ secrets.EVO_CR_LOGIN }}
-        password: ${{ secrets.EVO_CR_PWD }}
-
-    - name: Build and push docker image to Evolution Aritfact Registry
-      uses: docker/build-push-action@v5
-      with:
-        push: true
-        tags: ${{ env.CR_URI }}/backend:latest
-        file: ./Dockerfile
-        context: ./
+      - uses: actions/checkout@v4
+      - name: Install toolchain
+        uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: stable
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+      - name: Cache target
+        uses: actions/cache@v4
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-target-${{ hashFiles('**/Cargo.lock') }}
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          default: true
+      - name: Build
+        run: cargo build --all-targets --release

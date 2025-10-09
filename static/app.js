@@ -48,3 +48,62 @@ async function calculate(){
 
 document.getElementById('calculate').addEventListener('click',calculate);
 init();
+
+// --- Admin UI logic ---
+function adminHeaders(){
+    const token = document.getElementById('admin_token').value.trim();
+    const headers = {'Content-Type':'application/json'};
+    if(token) headers['Authorization'] = `Bearer ${token}`;
+    return headers;
+}
+
+async function adminFetchList(){
+    const type = document.getElementById('admin_model_type').value;
+    const res = await fetch(`/admin/${type}`,{headers: adminHeaders()});
+    if(!res.ok){ document.getElementById('admin_status').textContent = 'Failed to load: '+res.status; return; }
+    const data = await res.json();
+    const list = Array.isArray(data) ? data : (data.result || []);
+    const container = document.getElementById('admin_list');
+    container.innerHTML='';
+    const ul = document.createElement('ul');
+    list.forEach(it=>{
+        const li = document.createElement('li');
+        li.textContent = (it._id || it.id) + ' — ' + (it.name || it.title || JSON.stringify(it));
+        ul.appendChild(li);
+    });
+    container.appendChild(ul);
+}
+
+async function adminCreate(){
+    const type = document.getElementById('admin_model_type').value;
+    let payload;
+    try{ payload = JSON.parse(document.getElementById('admin_payload').value); }catch(e){ document.getElementById('admin_status').textContent='Invalid JSON'; return; }
+    const res = await fetch(`/admin/${type}`,{method:'POST',headers:adminHeaders(),body:JSON.stringify(payload)});
+    document.getElementById('admin_status').textContent = res.ok ? 'Created' : 'Failed: '+res.status;
+    adminFetchList();
+}
+
+async function adminUpdate(){
+    const type = document.getElementById('admin_model_type').value;
+    const id = document.getElementById('admin_item_id').value.trim();
+    if(!id){ document.getElementById('admin_status').textContent='Provide id'; return; }
+    let payload;
+    try{ payload = JSON.parse(document.getElementById('admin_payload').value); }catch(e){ document.getElementById('admin_status').textContent='Invalid JSON'; return; }
+    const res = await fetch(`/admin/${type}/${id}`,{method:'PUT',headers:adminHeaders(),body:JSON.stringify(payload)});
+    document.getElementById('admin_status').textContent = res.ok ? 'Updated' : 'Failed: '+res.status;
+    adminFetchList();
+}
+
+async function adminDelete(){
+    const type = document.getElementById('admin_model_type').value;
+    const id = document.getElementById('admin_item_id').value.trim();
+    if(!id){ document.getElementById('admin_status').textContent='Provide id'; return; }
+    const res = await fetch(`/admin/${type}/${id}`,{method:'DELETE',headers:adminHeaders()});
+    document.getElementById('admin_status').textContent = res.ok ? 'Deleted' : 'Failed: '+res.status;
+    adminFetchList();
+}
+
+document.getElementById('admin_refresh').addEventListener('click',adminFetchList);
+document.getElementById('admin_create').addEventListener('click',adminCreate);
+document.getElementById('admin_update').addEventListener('click',adminUpdate);
+document.getElementById('admin_delete').addEventListener('click',adminDelete);

@@ -13,4 +13,4 @@ pub struct Limitation {
 pub struct CreateLimitation {
     pub limited: bool, // true, если ограниченное число водителей
     pub coefficient: f64,
-} 
+}

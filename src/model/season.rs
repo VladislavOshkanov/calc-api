@@ -13,4 +13,4 @@ pub struct Season {
 pub struct CreateSeason {
     pub months: u32,
     pub coefficient: f64,
-} 
+}

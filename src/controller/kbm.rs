@@ -1,12 +1,12 @@
+use crate::model::kbm::{CreateKbm, Kbm};
+use crate::AppState;
 use axum::{
     extract::{Path, State},
     Json,
 };
-use mongodb::bson::{doc, oid::ObjectId};
 use futures::TryStreamExt;
+use mongodb::bson::{doc, oid::ObjectId};
 use std::sync::Arc;
-use crate::{AppState};
-use crate::model::kbm::{Kbm, CreateKbm};
 
 /// POST-эндпоинт для добавления нового объекта "KBM".
 pub async fn add_kbm(
@@ -38,7 +38,10 @@ pub async fn get_kbms(State(state): State<Arc<AppState>>) -> Json<Vec<Kbm>> {
     let client = &state.db_client;
     let collection = client.database("openapi").collection::<Kbm>("kbms");
 
-    let mut cursor = collection.find(None, None).await.expect("Failed to fetch kbms");
+    let mut cursor = collection
+        .find(None, None)
+        .await
+        .expect("Failed to fetch kbms");
 
     let mut kbms = Vec::new();
     while let Some(doc) = cursor.try_next().await.expect("Error fetching document") {

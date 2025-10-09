@@ -15,4 +15,4 @@ pub struct CreateAgeExperience {
     pub age: u32,
     pub experience: u32,
     pub coefficient: f64,
-} 
+}

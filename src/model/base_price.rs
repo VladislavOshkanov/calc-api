@@ -13,6 +13,6 @@ pub struct BasePrice {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct CreateBasePrice {
-    pub min_base_price: f64,  // Минимальная базовая цена
-    pub max_base_price: f64,  // Максимальная базовая цена
+    pub min_base_price: f64, // Минимальная базовая цена
+    pub max_base_price: f64, // Максимальная базовая цена
 }
