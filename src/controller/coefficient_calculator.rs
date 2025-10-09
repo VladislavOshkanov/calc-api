@@ -142,9 +142,16 @@ pub async fn calculate_coefficient(
         .await
         .map_err(|e| format!("Failed to fetch season: {}", e))?
         .ok_or("Season not found")?;
-    let season_coeff = season_doc["coefficient"]
+    let mut season_coeff = season_doc["coefficient"]
         .as_f64()
         .ok_or("Invalid coefficient in season")?;
+
+    // Правило КС: при периоде использования >= 9 месяцев коэффициент сезонности равен 1.0
+    if let Some(months) = season_doc.get("months").and_then(|v| v.as_i64()) {
+        if months >= 9 {
+            season_coeff = 1.0;
+        }
+    }
 
     // Получение последней базовой цены по дате создания (сортировка по created_at в убывающем порядке)
     let base_price_collection = client
@@ -166,9 +173,25 @@ pub async fn calculate_coefficient(
         .as_f64()
         .ok_or("Invalid max_base_price in base_price")?;
 
+    // Правила для безограничительного полиса (КО, КБМ, КВС):
+    // Если limitation.limited == false, то:
+    //  - КО берём из записи (ожидается 2.32 в справочнике)
+    //  - КБМ принудительно 1.17
+    //  - КВС принудительно 1.0
+    let limited_flag = limitation_doc
+        .get("limited")
+        .and_then(|v| v.as_bool())
+        .unwrap_or(true);
+
+    let (eff_kbm_coeff, eff_age_experience_coeff) = if !limited_flag {
+        (1.17_f64, 1.0_f64)
+    } else {
+        (kbm_coeff, age_experience_coeff)
+    };
+
     // Расчет произведения коэффициентов
-    let total_coefficient = age_experience_coeff
-        * kbm_coeff
+    let total_coefficient = eff_age_experience_coeff
+        * eff_kbm_coeff
         * limitation_coeff
         * place_coeff
         * power_coeff
@@ -183,8 +206,8 @@ pub async fn calculate_coefficient(
         min_price,
         max_price,
         coefficients: CoefficientDetails {
-            age_experience: age_experience_coeff,
-            kbm: kbm_coeff,
+            age_experience: eff_age_experience_coeff,
+            kbm: eff_kbm_coeff,
             limitation: limitation_coeff,
             place: place_coeff,
             power: power_coeff,
