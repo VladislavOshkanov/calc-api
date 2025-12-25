@@ -24,7 +24,7 @@ pub async fn add_base_price(
     };
 
     let result = collection
-        .insert_one(base_price.clone(), None)
+        .insert_one(base_price.clone())
         .await
         .expect("Failed to insert base_price.");
 
@@ -42,7 +42,7 @@ pub async fn get_base_prices(State(state): State<Arc<AppState>>) -> Json<Vec<Bas
         .collection::<BasePrice>("base_prices");
 
     let mut cursor = collection
-        .find(None, None)
+        .find(doc! {})
         .await
         .expect("Failed to fetch base_prices");
 
@@ -67,7 +67,7 @@ pub async fn get_base_price(
     let object_id = ObjectId::parse_str(&id).map_err(|_| "Invalid ID format".to_string())?;
     let filter = doc! { "_id": object_id };
 
-    match collection.find_one(filter, None).await {
+    match collection.find_one(filter).await {
         Ok(Some(base_price)) => Ok(Json(base_price)),
         Ok(None) => Err("BasePrice not found.".to_string()),
         Err(err) => Err(format!("Failed to fetch base_price: {err}")),
@@ -94,7 +94,7 @@ pub async fn update_base_price(
         }
     };
 
-    match collection.update_one(filter, update, None).await {
+    match collection.update_one(filter, update).await {
         Ok(result) if result.matched_count > 0 => Ok(Json(base_price)),
         Ok(_) => Err("BasePrice not found.".to_string()),
         Err(err) => Err(format!("Failed to update base_price: {err}")),
@@ -114,7 +114,7 @@ pub async fn delete_base_price(
     let object_id = ObjectId::parse_str(&id).map_err(|_| "Invalid ID format".to_string())?;
     let filter = doc! { "_id": object_id };
 
-    match collection.delete_one(filter, None).await {
+    match collection.delete_one(filter).await {
         Ok(result) if result.deleted_count > 0 => Ok(format!("BasePrice with ID {id} deleted.")),
         Ok(_) => Err("BasePrice not found.".to_string()),
         Err(err) => Err(format!("Failed to delete base_price: {err}")),

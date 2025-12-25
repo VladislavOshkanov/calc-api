@@ -62,7 +62,7 @@ pub async fn calculate_coefficient(
         .collection::<serde_json::Value>("age_experiences");
     let age_experience_filter = doc! { "_id": age_experience_id };
     let age_experience_doc = age_experience_collection
-        .find_one(age_experience_filter, None)
+        .find_one(age_experience_filter)
         .await
         .map_err(|e| format!("Failed to fetch age_experience: {}", e))?
         .ok_or("AgeExperience not found")?;
@@ -76,7 +76,7 @@ pub async fn calculate_coefficient(
         .collection::<serde_json::Value>("kbms");
     let kbm_filter = doc! { "_id": kbm_id };
     let kbm_doc = kbm_collection
-        .find_one(kbm_filter, None)
+        .find_one(kbm_filter)
         .await
         .map_err(|e| format!("Failed to fetch kbm: {}", e))?
         .ok_or("Kbm not found")?;
@@ -90,7 +90,7 @@ pub async fn calculate_coefficient(
         .collection::<serde_json::Value>("limitations");
     let limitation_filter = doc! { "_id": limitation_id };
     let limitation_doc = limitation_collection
-        .find_one(limitation_filter, None)
+        .find_one(limitation_filter)
         .await
         .map_err(|e| format!("Failed to fetch limitation: {}", e))?
         .ok_or("Limitation not found")?;
@@ -104,7 +104,7 @@ pub async fn calculate_coefficient(
         .collection::<serde_json::Value>("places");
     let place_filter = doc! { "_id": place_id };
     let place_doc = place_collection
-        .find_one(place_filter, None)
+        .find_one(place_filter)
         .await
         .map_err(|e| format!("Failed to fetch place: {}", e))?
         .ok_or("Place not found")?;
@@ -121,7 +121,7 @@ pub async fn calculate_coefficient(
         .collection::<serde_json::Value>("powers");
     let power_filter = doc! { "_id": power_id };
     let power_doc = power_collection
-        .find_one(power_filter, None)
+        .find_one(power_filter)
         .await
         .map_err(|e| format!("Failed to fetch power: {}", e))?
         .ok_or("Power not found")?;
@@ -138,7 +138,7 @@ pub async fn calculate_coefficient(
         .collection::<serde_json::Value>("seasons");
     let season_filter = doc! { "_id": season_id };
     let season_doc = season_collection
-        .find_one(season_filter, None)
+        .find_one(season_filter)
         .await
         .map_err(|e| format!("Failed to fetch season: {}", e))?
         .ok_or("Season not found")?;
@@ -162,7 +162,8 @@ pub async fn calculate_coefficient(
         .build();
 
     let base_price_doc = base_price_collection
-        .find_one(None, sort_options)
+        .find_one(doc! {})
+        .with_options(sort_options)
         .await
         .map_err(|e| format!("Failed to fetch latest base_price: {}", e))?
         .ok_or("No base_price records found")?;

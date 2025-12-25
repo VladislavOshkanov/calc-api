@@ -23,7 +23,7 @@ pub async fn add_place(
     };
 
     let result = collection
-        .insert_one(place.clone(), None)
+        .insert_one(place.clone())
         .await
         .expect("Failed to insert place.");
 
@@ -39,7 +39,7 @@ pub async fn get_places(State(state): State<Arc<AppState>>) -> Json<Vec<Place>> 
     let collection = client.database("openapi").collection::<Place>("places");
 
     let mut cursor = collection
-        .find(None, None)
+        .find(doc! {})
         .await
         .expect("Failed to fetch places");
 
@@ -62,7 +62,7 @@ pub async fn get_place(
     let object_id = ObjectId::parse_str(&id).map_err(|_| "Invalid ID format".to_string())?;
     let filter = mongodb::bson::doc! { "_id": object_id };
 
-    match collection.find_one(filter, None).await {
+    match collection.find_one(filter).await {
         Ok(Some(place)) => Ok(Json(place)),
         Ok(None) => Err("Place not found".to_string()),
         Err(err) => Err(format!("Failed to fetch place: {err}")),
@@ -87,7 +87,7 @@ pub async fn update_place(
         }
     };
 
-    match collection.update_one(filter, update, None).await {
+    match collection.update_one(filter, update).await {
         Ok(result) if result.matched_count > 0 => Ok(Json(place)),
         Ok(_) => Err("Place not found.".to_string()),
         Err(err) => Err(format!("Failed to update place: {err}")),
@@ -105,7 +105,7 @@ pub async fn delete_place(
     let object_id = ObjectId::parse_str(&id).map_err(|_| "Invalid ID format".to_string())?;
     let filter = doc! { "_id": object_id };
 
-    match collection.delete_one(filter, None).await {
+    match collection.delete_one(filter).await {
         Ok(result) if result.deleted_count > 0 => Ok(format!("Place with ID {id} deleted.")),
         Ok(_) => Err("Place not found.".to_string()),
         Err(err) => Err(format!("Failed to delete place: {err}")),

@@ -24,7 +24,7 @@ pub async fn add_power(
     };
 
     let result = collection
-        .insert_one(power.clone(), None)
+        .insert_one(power.clone())
         .await
         .expect("Failed to insert power.");
 
@@ -40,7 +40,7 @@ pub async fn get_powers(State(state): State<Arc<AppState>>) -> Json<Vec<Power>> 
     let collection = client.database("openapi").collection::<Power>("powers");
 
     let mut cursor = collection
-        .find(None, None)
+        .find(doc! {})
         .await
         .expect("Failed to fetch powers");
 
@@ -63,7 +63,7 @@ pub async fn get_power(
     let object_id = ObjectId::parse_str(&id).map_err(|_| "Invalid ID format".to_string())?;
     let filter = doc! { "_id": object_id };
 
-    match collection.find_one(filter, None).await {
+    match collection.find_one(filter).await {
         Ok(Some(power)) => Ok(Json(power)),
         Ok(None) => Err("Power not found.".to_string()),
         Err(err) => Err(format!("Failed to fetch power: {err}")),
@@ -89,7 +89,7 @@ pub async fn update_power(
         }
     };
 
-    match collection.update_one(filter, update, None).await {
+    match collection.update_one(filter, update).await {
         Ok(result) if result.matched_count > 0 => Ok(Json(power)),
         Ok(_) => Err("Power not found.".to_string()),
         Err(err) => Err(format!("Failed to update power: {err}")),
@@ -107,7 +107,7 @@ pub async fn delete_power(
     let object_id = ObjectId::parse_str(&id).map_err(|_| "Invalid ID format".to_string())?;
     let filter = doc! { "_id": object_id };
 
-    match collection.delete_one(filter, None).await {
+    match collection.delete_one(filter).await {
         Ok(result) if result.deleted_count > 0 => Ok(format!("Power with ID {id} deleted.")),
         Ok(_) => Err("Power not found.".to_string()),
         Err(err) => Err(format!("Failed to delete power: {err}")),

@@ -23,7 +23,7 @@ pub async fn add_age_experience(
     };
 
     let result = collection
-        .insert_one(age_experience.clone(), None)
+        .insert_one(age_experience.clone())
         .await
         .expect("Failed to insert age_experience.");
 
@@ -40,7 +40,7 @@ pub async fn get_age_experiences(State(state): State<Arc<AppState>>) -> Json<Vec
         .collection::<AgeExperience>("age_experiences");
 
     let mut cursor = collection
-        .find(None, None)
+        .find(doc! {})
         .await
         .expect("Failed to fetch age_experiences");
 
@@ -64,7 +64,7 @@ pub async fn get_age_experience(
     let object_id = ObjectId::parse_str(&id).map_err(|_| "Invalid ID format".to_string())?;
     let filter = mongodb::bson::doc! { "_id": object_id };
 
-    match collection.find_one(filter, None).await {
+    match collection.find_one(filter).await {
         Ok(Some(age_experience)) => Ok(Json(age_experience)),
         Ok(None) => Err("AgeExperience not found".to_string()),
         Err(err) => Err(format!("Failed to fetch age_experience: {err}")),
@@ -91,7 +91,7 @@ pub async fn update_age_experience(
         }
     };
 
-    match collection.update_one(filter, update, None).await {
+    match collection.update_one(filter, update).await {
         Ok(result) if result.matched_count > 0 => Ok(Json(age_experience)),
         Ok(_) => Err("AgeExperience not found.".to_string()),
         Err(err) => Err(format!("Failed to update age_experience: {err}")),
@@ -110,7 +110,7 @@ pub async fn delete_age_experience(
     let object_id = ObjectId::parse_str(&id).map_err(|_| "Invalid ID format".to_string())?;
     let filter = doc! { "_id": object_id };
 
-    match collection.delete_one(filter, None).await {
+    match collection.delete_one(filter).await {
         Ok(result) if result.deleted_count > 0 => {
             Ok(format!("AgeExperience with ID {id} deleted."))
         }

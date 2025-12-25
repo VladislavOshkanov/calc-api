@@ -28,43 +28,43 @@ pub async fn get_all_models(State(state): State<Arc<AppState>>) -> Json<AllModel
     let mut age_exp_cursor = client
         .database("openapi")
         .collection::<AgeExperience>("age_experiences")
-        .find(None, None)
+        .find(doc! {})
         .await
         .expect("Failed to fetch age_experiences");
     let mut kbm_cursor = client
         .database("openapi")
         .collection::<Kbm>("kbms")
-        .find(None, None)
+        .find(doc! {})
         .await
         .expect("Failed to fetch kbms");
     let mut limitation_cursor = client
         .database("openapi")
         .collection::<Limitation>("limitations")
-        .find(None, None)
+        .find(doc! {})
         .await
         .expect("Failed to fetch limitations");
     let mut place_cursor = client
         .database("openapi")
         .collection::<Place>("places")
-        .find(None, None)
+        .find(doc! {})
         .await
         .expect("Failed to fetch places");
     let mut power_cursor = client
         .database("openapi")
         .collection::<Power>("powers")
-        .find(None, None)
+        .find(doc! {})
         .await
         .expect("Failed to fetch powers");
     let mut season_cursor = client
         .database("openapi")
         .collection::<Season>("seasons")
-        .find(None, None)
+        .find(doc! {})
         .await
         .expect("Failed to fetch seasons");
     let mut base_price_cursor = client
         .database("openapi")
         .collection::<BasePrice>("base_prices")
-        .find(None, None)
+        .find(doc! {})
         .await
         .expect("Failed to fetch base_prices");
 

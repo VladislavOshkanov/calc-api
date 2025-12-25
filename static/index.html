@@ -3,47 +3,84 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>OSAGO Coefficient Calculator</title>
+    <title>OSAGO Coefficient Studio</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-<div class="container">
-    <h1>OSAGO Price Calculator</h1>
-    <div id="selectors" class="card">
-        <!-- Selectors will be injected here -->
-    </div>
-    <div class="actions">
-        <button id="calculate">Calculate</button>
-        <div id="result" class="result"></div>
-    </div>
-
-    <hr />
-    <div class="container">
-        <h2>Admin Panel</h2>
-        <div class="card">
-            <label>Admin Token: <input id="admin_token" type="password" placeholder="Bearer token"/></label>
-            <select id="admin_model_type">
-                <option value="place">Place</option>
-                <option value="power">Power</option>
-                <option value="kbm">KBM</option>
-                <option value="age_experience">Age Experience</option>
-                <option value="season">Season</option>
-                <option value="limitation">Limitation</option>
-                <option value="base_price">Base Price</option>
-            </select>
-            <button id="admin_refresh">Refresh</button>
-            <div id="admin_list"></div>
-            <h3>Create / Update</h3>
-            <textarea id="admin_payload" rows="6" cols="60" placeholder='Enter JSON payload, e.g. {"name":"Moscow","coefficent":1.5}'></textarea>
-            <br/>
-            <input id="admin_item_id" placeholder="id (for update/delete)" />
-            <br/>
-            <button id="admin_create">Create</button>
-            <button id="admin_update">Update</button>
-            <button id="admin_delete">Delete</button>
-            <div id="admin_status"></div>
+<div class="page">
+    <header class="hero">
+        <div>
+            <p class="hero__eyebrow">OSAGO Studio</p>
+            <h1>Современный калькулятор коэффициентов</h1>
+            <p class="hero__lead">Сравнивайте тарифы по параметрам и получайте актуальный результат за секунды.</p>
         </div>
-    </div>
+        <div class="hero__badge">
+            <span>В режиме реального времени</span>
+            <strong>Обновляется ежедневно</strong>
+        </div>
+    </header>
+
+    <main class="panels">
+        <section class="panel calculator">
+            <div class="panel__header">
+                <div>
+                    <h2>Рассчитать коэффициент</h2>
+                    <p class="muted">Выберите параметры автомобиля и водителя, нажмите «Рассчитать».<br>Мы покажем коэффициент и итоговую цену.</p>
+                </div>
+                <div id="status_pill" class="status-pill" hidden>Готово</div>
+            </div>
+            <div id="selectors" class="selectors-grid card">
+                <p class="muted">Загрузка данных…</p>
+            </div>
+            <div class="actions">
+                <button id="calculate">Рассчитать</button>
+                <div id="result" class="result-card">
+                    <p class="muted">Результат появится здесь</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel admin">
+            <div class="panel__header">
+                <div>
+                    <h2>Админ-панель</h2>
+                    <p class="muted">Управляйте данными коэффициентов без консоли.</p>
+                </div>
+                <button id="admin_refresh" class="ghost">Обновить список</button>
+            </div>
+            <div class="admin-grid">
+                <label class="input-label">
+                    <span>Admin token</span>
+                    <input id="admin_token" type="password" placeholder="Bearer token" />
+                </label>
+                <label class="input-label">
+                    <span>Модель</span>
+                    <select id="admin_model_type">
+                        <option value="place">place</option>
+                        <option value="power">power</option>
+                        <option value="kbm">kbm</option>
+                        <option value="age_experience">age_experience</option>
+                        <option value="season">season</option>
+                        <option value="limitation">limitation</option>
+                        <option value="base_price">base_price</option>
+                    </select>
+                </label>
+            </div>
+            <textarea id="admin_payload" class="admin-textarea" rows="4" placeholder='Пример: {"name":"Moscow","coefficent":1.5}'></textarea>
+            <div class="admin-row">
+                <input id="admin_item_id" class="admin-id" placeholder="ID (для обновления/удаления)" />
+                <div id="admin_status" class="admin-status">Статус операций появится здесь</div>
+            </div>
+            <div class="admin-actions">
+                <button id="admin_create">Создать</button>
+                <button id="admin_update">Обновить</button>
+                <button id="admin_delete">Удалить</button>
+            </div>
+            <div id="admin_list" class="admin-list">
+                <p class="muted">Нажмите «Обновить список», чтобы увидеть записи.</p>
+            </div>
+        </section>
+    </main>
 </div>
 <script src="/static/app.js"></script>
 </body>

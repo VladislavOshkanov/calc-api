@@ -22,7 +22,7 @@ pub async fn add_season(
     };
 
     let result = collection
-        .insert_one(season.clone(), None)
+        .insert_one(season.clone())
         .await
         .expect("Failed to insert season.");
 
@@ -37,7 +37,7 @@ pub async fn get_seasons(State(state): State<Arc<AppState>>) -> Json<Vec<Season>
     let collection = client.database("openapi").collection::<Season>("seasons");
 
     let mut cursor = collection
-        .find(None, None)
+        .find(doc! {})
         .await
         .expect("Failed to fetch seasons");
 
@@ -59,7 +59,7 @@ pub async fn get_season(
     let object_id = ObjectId::parse_str(&id).map_err(|_| "Invalid ID format".to_string())?;
     let filter = mongodb::bson::doc! { "_id": object_id };
 
-    match collection.find_one(filter, None).await {
+    match collection.find_one(filter).await {
         Ok(Some(season)) => Ok(Json(season)),
         Ok(None) => Err("Season not found".to_string()),
         Err(err) => Err(format!("Failed to fetch season: {err}")),
@@ -83,7 +83,7 @@ pub async fn update_season(
         }
     };
 
-    match collection.update_one(filter, update, None).await {
+    match collection.update_one(filter, update).await {
         Ok(result) if result.matched_count > 0 => Ok(Json(season)),
         Ok(_) => Err("Season not found.".to_string()),
         Err(err) => Err(format!("Failed to update season: {err}")),
@@ -100,7 +100,7 @@ pub async fn delete_season(
     let object_id = ObjectId::parse_str(&id).map_err(|_| "Invalid ID format".to_string())?;
     let filter = doc! { "_id": object_id };
 
-    match collection.delete_one(filter, None).await {
+    match collection.delete_one(filter).await {
         Ok(result) if result.deleted_count > 0 => Ok(format!("Season with ID {id} deleted.")),
         Ok(_) => Err("Season not found.".to_string()),
         Err(err) => Err(format!("Failed to delete season: {err}")),

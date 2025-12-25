@@ -119,16 +119,30 @@ REST API для расчёта стоимости ОСАГО на основе �
 - Rust toolchain
 - MongoDB
 
+### Docker MongoDB без пароля
+
+```bash
+docker run -d --name openapi-mongo -p 27017:27017 mongo:7
+```
+
+Контейнер запускает MongoDB без авторизации. Подключение по строке mongodb://localhost:27017 доступно из хоста благодаря пробросу порта.
+
+После завершения работы:
+
+```bash
+docker stop openapi-mongo && docker rm openapi-mongo
+```
+
 ### Сборка и запуск
 
 ```bash
 git clone https://github.com/VladislavOshkanov/calc-api.git
 cd calc-api
 cargo build
-cargo run
+cargo run --bin openapi
 ```
 
-Сервер по умолчанию слушает 127.0.0.1:8000.
+Сервер по умолчанию слушает 127.0.0.1:8000, а клиент подключается к MongoDB на localhost:27017.
 
 ## Тесты и форматирование
 
@@ -136,6 +150,16 @@ cargo run
 - Форматирование: cargo fmt
 - Статический анализ: cargo clippy --all-targets --all-features -- -D warnings
 
+### Интеграционные тесты
+
+1. Убедитесь, что MongoDB и сервер запущены (см. инструкцию выше о Docker-сервере и `cargo run --bin openapi`). Сервер должен работать в отдельной консоли.
+2. Выполните команду:
+
+```bash
+E2E_BASE_URL=http://127.0.0.1:8000 ADMIN_TOKEN=test_admin_token cargo test --test e2e_tests
+```
+
+3. Если вы переопределяете `ADMIN_TOKEN` или `E2E_BASE_URL`, используйте одинаковые значения для сервера и тестов.`}{
 ## Изменение логики расчёта (обновление 2025)
 
 - Поле выбора базовой цены удалено из веб-интерфейса.

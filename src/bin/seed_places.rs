@@ -7,7 +7,8 @@ use std::{fs, path::Path};
 async fn main() -> Result<()> {
     // Настройки
     let html_path = "data/place.html";
-    let mongo_uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| "mongodb://localhost:27017".to_string());
+    let mongo_uri =
+        std::env::var("MONGODB_URI").unwrap_or_else(|_| "mongodb://localhost:27017".to_string());
 
     // Чтение HTML
     let html = fs::read_to_string(Path::new(html_path))
@@ -37,19 +38,28 @@ async fn main() -> Result<()> {
             .collect();
 
         // Ожидаем минимум 3 колонки: [№, Регион, Коэффициент ТС, ...]
-        if tds.len() < 3 { skipped += 1; continue; }
+        if tds.len() < 3 {
+            skipped += 1;
+            continue;
+        }
 
         let name = tds[1].trim();
         let coef_raw = tds[2].trim();
 
         // Пропуск пустых/coefficient отсутствует
-        if name.is_empty() || coef_raw.is_empty() { skipped += 1; continue; }
+        if name.is_empty() || coef_raw.is_empty() {
+            skipped += 1;
+            continue;
+        }
 
         // Коэффициент в данных записан с запятой
         let coef_str = coef_raw.replace(',', ".");
         let coefficent: f64 = match coef_str.parse() {
             Ok(v) => v,
-            Err(_) => { skipped += 1; continue; }
+            Err(_) => {
+                skipped += 1;
+                continue;
+            }
         };
 
         // Upsert по name
@@ -58,16 +68,26 @@ async fn main() -> Result<()> {
             "$set": { "name": name, "coefficent": coefficent },
             "$setOnInsert": { }
         };
-        let opts = mongodb::options::UpdateOptions::builder().upsert(true).build();
+        let opts = mongodb::options::UpdateOptions::builder()
+            .upsert(true)
+            .build();
         let res = collection
-            .update_one(filter, update, opts)
+            .update_one(filter, update)
+            .with_options(opts)
             .await
             .map_err(|e| anyhow!("mongo update failed for '{}': {}", name, e))?;
 
-        if res.matched_count == 0 { inserted += 1; } else { updated += 1; }
+        if res.matched_count == 0 {
+            inserted += 1;
+        } else {
+            updated += 1;
+        }
     }
 
-    println!("Seed places done: inserted={}, updated={}, skipped={}", inserted, updated, skipped);
+    println!(
+        "Seed places done: inserted={}, updated={}, skipped={}",
+        inserted, updated, skipped
+    );
     Ok(())
 }
 

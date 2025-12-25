@@ -5,6 +5,7 @@ async function fetchModels(){
 
 function createSelector(id,label,items){
     const wrapper = document.createElement('div');
+    wrapper.className = 'selector';
     const lab = document.createElement('label'); lab.textContent = label; wrapper.appendChild(lab);
     const sel = document.createElement('select'); sel.id = id;
     items.forEach(it=>{
@@ -18,17 +19,27 @@ function createSelector(id,label,items){
 }
 
 async function init(){
-    const data = await fetchModels().catch(e=>{document.getElementById('selectors').textContent='Failed to load models';});
+    const data = await fetchModels().catch(e=>{document.getElementById('selectors').innerHTML='<p class="muted">Не удалось загрузить данные</p>';});
     if(!data) return;
     const container = document.getElementById('selectors');
     container.innerHTML='';
-    container.appendChild(createSelector('age_experience','Age experience',data.age_experience));
-    container.appendChild(createSelector('kbm','KBM',data.kbm));
-    container.appendChild(createSelector('limitation','Limitation',data.limitation));
-    container.appendChild(createSelector('place','Place',data.place));
-    container.appendChild(createSelector('power','Power',data.power));
-    container.appendChild(createSelector('season','Season',data.season));
+    const order = ['age_experience','kbm','limitation','power','season','place'];
+    const labels = {
+        age_experience: 'Опыт вождения',
+        kbm: 'KBM',
+        limitation: 'Ограничения',
+        power: 'Мощность',
+        season: 'Сезон',
+        place: 'Регион'
+    };
+    order.forEach(key=>{
+        const items = data[key] || [];
+        container.appendChild(createSelector(key,labels[key],items));
+    });
+    document.getElementById('status_pill').hidden = false;
 }
+
+const resultBefore = document.getElementById('result');
 
 async function calculate(){
     const payload = {
@@ -39,11 +50,22 @@ async function calculate(){
         power_id: document.getElementById('power').value,
         season_id: document.getElementById('season').value
     };
-    const res = await fetch('/api/calculate-coefficient',{
-        method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)
-    });
-    const data = await res.json();
-    document.getElementById('result').textContent = JSON.stringify(data);
+    resultBefore.textContent = 'Загрузка...';
+    resultBefore.classList.add('result-loading');
+    try{
+        const res = await fetch('/api/calculate-coefficient',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+        const data = await res.json();
+        if(res.ok){
+            const value = data.coefficient || data.result || data;
+            resultBefore.innerHTML = `<strong>${value}</strong><span class=\"muted\">${data.total_price ? `Итог: ${data.total_price}` : ''}</span>`;
+        }else{
+            resultBefore.textContent = `Ошибка: ${data.message || res.status}`;
+        }
+    }catch(e){
+        resultBefore.textContent = 'Сервис недоступен';
+    }finally{
+        resultBefore.classList.remove('result-loading');
+    }
 }
 
 document.getElementById('calculate').addEventListener('click',calculate);

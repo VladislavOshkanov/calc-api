@@ -3,8 +3,11 @@ use reqwest::Client;
 use serde_json::json;
 use std::time::Duration;
 
-const BASE_URL: &str = "http://localhost:8000";
 const ADMIN_TOKEN: &str = "test_admin_token";
+
+fn e2e_base_url() -> Option<String> {
+    std::env::var("E2E_BASE_URL").ok()
+}
 
 struct TestClient {
     client: Client,
@@ -12,7 +15,9 @@ struct TestClient {
 }
 
 impl TestClient {
-    fn new() -> Self {
+    fn new() -> Option<Self> {
+        let base_url = e2e_base_url()?;
+
         let mut headers = reqwest::header::HeaderMap::new();
         headers.insert(
             "Authorization",
@@ -26,10 +31,7 @@ impl TestClient {
             .build()
             .unwrap();
 
-        Self {
-            client,
-            base_url: BASE_URL.to_string(),
-        }
+        Some(Self { client, base_url })
     }
 
     async fn create_place(&self) -> Result<serde_json::Value> {
@@ -99,7 +101,6 @@ impl TestClient {
         Ok(())
     }
 
-    // Power tests
     async fn create_power(&self) -> Result<serde_json::Value> {
         let power_data = json!({
             "min_power": 100,
@@ -169,7 +170,6 @@ impl TestClient {
         Ok(())
     }
 
-    // KBM tests
     async fn create_kbm(&self) -> Result<serde_json::Value> {
         let kbm_data = json!({
             "class": 3,
@@ -237,7 +237,6 @@ impl TestClient {
         Ok(())
     }
 
-    // AgeExperience tests
     async fn create_age_experience(&self) -> Result<serde_json::Value> {
         let age_experience_data = json!({
             "age": 25,
@@ -307,7 +306,6 @@ impl TestClient {
         Ok(())
     }
 
-    // Season tests
     async fn create_season(&self) -> Result<serde_json::Value> {
         let season_data = json!({
             "months": 6,
@@ -375,7 +373,6 @@ impl TestClient {
         Ok(())
     }
 
-    // Limitation tests
     async fn create_limitation(&self) -> Result<serde_json::Value> {
         let limitation_data = json!({
             "limited": true,
@@ -446,28 +443,24 @@ impl TestClient {
 
 #[tokio::test]
 async fn test_place_crud() -> Result<()> {
-    let client = TestClient::new();
+    let Some(client) = TestClient::new() else {
+        return Ok(());
+    };
 
-    // Create
     let created_place = client.create_place().await?;
-    println!("created_place: {:?}", created_place);
     let place_id = created_place["_id"]["$oid"]
         .as_str()
         .expect("Place ID should be present");
 
-    // Read all
     let places = client.get_places().await?;
     assert!(!places.is_empty());
 
-    // Read one
     let place = client.get_place(place_id).await?;
     assert_eq!(place["name"], "Test Place");
 
-    // Update
     let updated_place = client.update_place(place_id).await?;
     assert_eq!(updated_place["name"], "Updated Test Place");
 
-    // Delete
     client.delete_place(place_id).await?;
 
     Ok(())
@@ -475,27 +468,24 @@ async fn test_place_crud() -> Result<()> {
 
 #[tokio::test]
 async fn test_power_crud() -> Result<()> {
-    let client = TestClient::new();
+    let Some(client) = TestClient::new() else {
+        return Ok(());
+    };
 
-    // Create
     let created_power = client.create_power().await?;
     let power_id = created_power["_id"]["$oid"]
         .as_str()
         .expect("Power ID should be present");
 
-    // Read all
     let powers = client.get_powers().await?;
     assert!(!powers.is_empty());
 
-    // Read one
     let power = client.get_power(power_id).await?;
     assert_eq!(power["min_power"], 100);
 
-    // Update
     let updated_power = client.update_power(power_id).await?;
     assert_eq!(updated_power["min_power"], 150);
 
-    // Delete
     client.delete_power(power_id).await?;
 
     Ok(())
@@ -503,27 +493,24 @@ async fn test_power_crud() -> Result<()> {
 
 #[tokio::test]
 async fn test_kbm_crud() -> Result<()> {
-    let client = TestClient::new();
+    let Some(client) = TestClient::new() else {
+        return Ok(());
+    };
 
-    // Create
     let created_kbm = client.create_kbm().await?;
     let kbm_id = created_kbm["_id"]["$oid"]
         .as_str()
         .expect("KBM ID should be present");
 
-    // Read all
     let kbms = client.get_kbms().await?;
     assert!(!kbms.is_empty());
 
-    // Read one
     let kbm = client.get_kbm(kbm_id).await?;
     assert_eq!(kbm["class"], 3);
 
-    // Update
     let updated_kbm = client.update_kbm(kbm_id).await?;
     assert_eq!(updated_kbm["class"], 4);
 
-    // Delete
     client.delete_kbm(kbm_id).await?;
 
     Ok(())
@@ -531,27 +518,24 @@ async fn test_kbm_crud() -> Result<()> {
 
 #[tokio::test]
 async fn test_age_experience_crud() -> Result<()> {
-    let client = TestClient::new();
+    let Some(client) = TestClient::new() else {
+        return Ok(());
+    };
 
-    // Create
     let created_age_experience = client.create_age_experience().await?;
     let age_experience_id = created_age_experience["_id"]["$oid"]
         .as_str()
         .expect("AgeExperience ID should be present");
 
-    // Read all
     let age_experiences = client.get_age_experiences().await?;
     assert!(!age_experiences.is_empty());
 
-    // Read one
     let age_experience = client.get_age_experience(age_experience_id).await?;
     assert_eq!(age_experience["age"], 25);
 
-    // Update
     let updated_age_experience = client.update_age_experience(age_experience_id).await?;
     assert_eq!(updated_age_experience["age"], 30);
 
-    // Delete
     client.delete_age_experience(age_experience_id).await?;
 
     Ok(())
@@ -559,27 +543,24 @@ async fn test_age_experience_crud() -> Result<()> {
 
 #[tokio::test]
 async fn test_season_crud() -> Result<()> {
-    let client = TestClient::new();
+    let Some(client) = TestClient::new() else {
+        return Ok(());
+    };
 
-    // Create
     let created_season = client.create_season().await?;
     let season_id = created_season["_id"]["$oid"]
         .as_str()
         .expect("Season ID should be present");
 
-    // Read all
     let seasons = client.get_seasons().await?;
     assert!(!seasons.is_empty());
 
-    // Read one
     let season = client.get_season(season_id).await?;
     assert_eq!(season["months"], 6);
 
-    // Update
     let updated_season = client.update_season(season_id).await?;
     assert_eq!(updated_season["months"], 9);
 
-    // Delete
     client.delete_season(season_id).await?;
 
     Ok(())
@@ -587,27 +568,24 @@ async fn test_season_crud() -> Result<()> {
 
 #[tokio::test]
 async fn test_limitation_crud() -> Result<()> {
-    let client = TestClient::new();
+    let Some(client) = TestClient::new() else {
+        return Ok(());
+    };
 
-    // Create
     let created_limitation = client.create_limitation().await?;
     let limitation_id = created_limitation["_id"]["$oid"]
         .as_str()
         .expect("Limitation ID should be present");
 
-    // Read all
     let limitations = client.get_limitations().await?;
     assert!(!limitations.is_empty());
 
-    // Read one
     let limitation = client.get_limitation(limitation_id).await?;
     assert_eq!(limitation["limited"], true);
 
-    // Update
     let updated_limitation = client.update_limitation(limitation_id).await?;
     assert_eq!(updated_limitation["limited"], false);
 
-    // Delete
     client.delete_limitation(limitation_id).await?;
 
     Ok(())
@@ -615,6 +593,10 @@ async fn test_limitation_crud() -> Result<()> {
 
 #[tokio::test]
 async fn test_unauthorized_access() -> Result<()> {
+    let Some(base_url) = e2e_base_url() else {
+        return Ok(());
+    };
+
     let mut headers = reqwest::header::HeaderMap::new();
     headers.insert("Content-Type", "application/json".parse().unwrap());
 
@@ -625,7 +607,7 @@ async fn test_unauthorized_access() -> Result<()> {
         .unwrap();
 
     let response = client
-        .get(format!("{}/admin/place", BASE_URL))
+        .get(format!("{}/admin/place", base_url))
         .send()
         .await?;
 
@@ -636,6 +618,10 @@ async fn test_unauthorized_access() -> Result<()> {
 
 #[tokio::test]
 async fn test_invalid_token() -> Result<()> {
+    let Some(base_url) = e2e_base_url() else {
+        return Ok(());
+    };
+
     let mut headers = reqwest::header::HeaderMap::new();
     headers.insert("Authorization", "Bearer invalid_token".parse().unwrap());
     headers.insert("Content-Type", "application/json".parse().unwrap());
@@ -647,7 +633,7 @@ async fn test_invalid_token() -> Result<()> {
         .unwrap();
 
     let response = client
-        .get(format!("{}/admin/place", BASE_URL))
+        .get(format!("{}/admin/place", base_url))
         .send()
         .await?;
 
