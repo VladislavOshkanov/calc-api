@@ -20,6 +20,7 @@ pub async fn add_age_experience(
         age: create_age_experience.age,
         experience: create_age_experience.experience,
         coefficient: create_age_experience.coefficient,
+        label: create_age_experience.label,
     };
 
     let result = collection
@@ -88,6 +89,7 @@ pub async fn update_age_experience(
             "age": age_experience.age,
             "experience": age_experience.experience,
             "coefficient": age_experience.coefficient,
+            "label": age_experience.label.clone(),
         }
     };
 

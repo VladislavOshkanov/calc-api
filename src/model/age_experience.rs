@@ -8,6 +8,8 @@ pub struct AgeExperience {
     pub age: u32,
     pub experience: u32,
     pub coefficient: f64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub label: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -15,4 +17,6 @@ pub struct CreateAgeExperience {
     pub age: u32,
     pub experience: u32,
     pub coefficient: f64,
+    #[serde(default)]
+    pub label: Option<String>,
 }

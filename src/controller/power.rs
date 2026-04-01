@@ -85,7 +85,7 @@ pub async fn update_power(
         "$set": {
             "min_power": power.min_power,
             "max_power": power.max_power,
-            "coefficient": power.coefficent,
+            "coefficent": power.coefficent,
         }
     };
 

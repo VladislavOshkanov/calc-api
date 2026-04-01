@@ -87,20 +87,28 @@ pub fn build_router(shared_state: Arc<AppState>) -> Router {
         .route("/api/all-models", get(get_all_models))
         .route("/api/calculate-coefficient", post(calculate_coefficient))
         .route("/", get(root))
+        .route("/admin", get(admin_root))
+        .route("/admin/", get(admin_root))
         .route("/static/{*file}", get(static_files))
         .merge(admin_routes)
         .with_state(shared_state)
 }
 
 async fn root() -> Result<Html<String>, (StatusCode, String)> {
-    let content = fs::read_to_string("./static/index.html")
-        .await
-        .map_err(|e| {
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                format!("read error: {}", e),
-            )
-        })?;
+    render_html("./static/index.html").await
+}
+
+async fn admin_root() -> Result<Html<String>, (StatusCode, String)> {
+    render_html("./static/admin.html").await
+}
+
+async fn render_html(path: &str) -> Result<Html<String>, (StatusCode, String)> {
+    let content = fs::read_to_string(path).await.map_err(|e| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("read error: {}", e),
+        )
+    })?;
     Ok(Html(content))
 }
 

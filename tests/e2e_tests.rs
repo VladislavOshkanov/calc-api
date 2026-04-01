@@ -415,7 +415,7 @@ impl TestClient {
     async fn update_limitation(&self, id: &str) -> Result<serde_json::Value> {
         let limitation_data = json!({
             "limited": false,
-            "coefficient": 2.32
+            "coefficient": 3.16
         });
 
         let response = self

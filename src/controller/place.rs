@@ -83,7 +83,7 @@ pub async fn update_place(
     let update = doc! {
         "$set": {
             "name": place.name.clone(),
-            "coefficient": place.coefficent,
+            "coefficent": place.coefficent,
         }
     };
 

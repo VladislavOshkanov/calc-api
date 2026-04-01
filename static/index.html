@@ -1,87 +1,66 @@
 <!doctype html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>OSAGO Coefficient Studio</title>
+    <title>Калькулятор ОСАГО</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
-<body>
-<div class="page">
-    <header class="hero">
-        <div>
-            <p class="hero__eyebrow">OSAGO Studio</p>
-            <h1>Современный калькулятор коэффициентов</h1>
-            <p class="hero__lead">Сравнивайте тарифы по параметрам и получайте актуальный результат за секунды.</p>
-        </div>
-        <div class="hero__badge">
-            <span>В режиме реального времени</span>
-            <strong>Обновляется ежедневно</strong>
-        </div>
+<body class="site-body">
+<div class="page-shell">
+    <header class="topbar">
+        <a class="brand" href="/">OSAGO / Calculator</a>
+        <nav class="topbar__nav">
+            <a class="nav-link is-active" href="/">Пользовательский интерфейс</a>
+            <a class="nav-link" href="/admin">Админский интерфейс</a>
+        </nav>
     </header>
 
-    <main class="panels">
-        <section class="panel calculator">
-            <div class="panel__header">
-                <div>
-                    <h2>Рассчитать коэффициент</h2>
-                    <p class="muted">Выберите параметры автомобиля и водителя, нажмите «Рассчитать».<br>Мы покажем коэффициент и итоговую цену.</p>
-                </div>
-                <div id="status_pill" class="status-pill" hidden>Готово</div>
+    <main class="layout">
+        <section class="hero-card hero-card--user">
+            <div>
+                <p class="eyebrow">Публичный калькулятор</p>
+                <h1>Расчёт стоимости ОСАГО без админского шума</h1>
+                <p class="hero-copy">Выберите территорию, мощность, КБМ, период использования и параметры водителя. Интерфейс показывает итоговый коэффициент и диапазон стоимости по актуальной базовой ставке.</p>
             </div>
-            <div id="selectors" class="selectors-grid card">
-                <p class="muted">Загрузка данных…</p>
-            </div>
-            <div class="actions">
-                <button id="calculate">Рассчитать</button>
-                <div id="result" class="result-card">
-                    <p class="muted">Результат появится здесь</p>
-                </div>
+            <div class="hero-aside">
+                <span id="tariff_badge" class="info-chip">Базовый тариф: загружается…</span>
+                <span id="status_pill" class="status-pill" hidden>Справочники готовы</span>
             </div>
         </section>
 
-        <section class="panel admin">
-            <div class="panel__header">
+        <section class="panel">
+            <div class="section-head">
                 <div>
-                    <h2>Админ-панель</h2>
-                    <p class="muted">Управляйте данными коэффициентов без консоли.</p>
+                    <h2>Параметры расчёта</h2>
+                    <p class="muted">Форма работает со справочниками, загруженными из базы данных проекта.</p>
                 </div>
-                <button id="admin_refresh" class="ghost">Обновить список</button>
+                <button id="calculate" class="primary-button" type="button">Рассчитать</button>
             </div>
-            <div class="admin-grid">
-                <label class="input-label">
-                    <span>Admin token</span>
-                    <input id="admin_token" type="password" placeholder="Bearer token" />
-                </label>
-                <label class="input-label">
-                    <span>Модель</span>
-                    <select id="admin_model_type">
-                        <option value="place">place</option>
-                        <option value="power">power</option>
-                        <option value="kbm">kbm</option>
-                        <option value="age_experience">age_experience</option>
-                        <option value="season">season</option>
-                        <option value="limitation">limitation</option>
-                        <option value="base_price">base_price</option>
-                    </select>
-                </label>
+            <div id="selectors" class="selectors-grid">
+                <p class="muted">Загрузка данных…</p>
             </div>
-            <textarea id="admin_payload" class="admin-textarea" rows="4" placeholder='Пример: {"name":"Moscow","coefficent":1.5}'></textarea>
-            <div class="admin-row">
-                <input id="admin_item_id" class="admin-id" placeholder="ID (для обновления/удаления)" />
-                <div id="admin_status" class="admin-status">Статус операций появится здесь</div>
+        </section>
+
+        <section class="panel result-panel">
+            <div class="section-head">
+                <div>
+                    <h2>Результат</h2>
+                    <p class="muted">Используется последняя запись `base_price` и коэффициенты из выбранных справочников.</p>
+                </div>
             </div>
-            <div class="admin-actions">
-                <button id="admin_create">Создать</button>
-                <button id="admin_update">Обновить</button>
-                <button id="admin_delete">Удалить</button>
+            <div id="result" class="result-box">
+                <p class="muted">После расчёта здесь появится коэффициент и диапазон цены.</p>
             </div>
-            <div id="admin_list" class="admin-list">
-                <p class="muted">Нажмите «Обновить список», чтобы увидеть записи.</p>
+            <div class="formula-box">
+                <h3>Разложение формулы</h3>
+                <div id="formula_details" class="formula-grid">
+                    <p class="muted">Коэффициенты появятся после расчёта.</p>
+                </div>
             </div>
         </section>
     </main>
 </div>
-<script src="/static/app.js"></script>
+<script src="/static/calculator.js"></script>
 </body>
 </html>

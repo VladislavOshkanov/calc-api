@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Админка ОСАГО</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="site-body">
+<div class="page-shell">
+    <header class="topbar">
+        <a class="brand" href="/">OSAGO / Admin</a>
+        <nav class="topbar__nav">
+            <a class="nav-link" href="/">Пользовательский интерфейс</a>
+            <a class="nav-link is-active" href="/admin">Админский интерфейс</a>
+        </nav>
+    </header>
+
+    <main class="layout">
+        <section class="hero-card hero-card--admin">
+            <div>
+                <p class="eyebrow">Администрирование</p>
+                <h1>Управление справочниками отдельно от клиентского калькулятора</h1>
+                <p class="hero-copy">Здесь остаются CRUD-операции по `place`, `power`, `kbm`, `age_experience`, `season`, `limitation` и `base_price`. API защищён Bearer-токеном.</p>
+            </div>
+            <div class="hero-aside">
+                <span class="info-chip">Маршруты: `/admin/*`</span>
+                <span class="info-chip">Авторизация: `Bearer ADMIN_TOKEN`</span>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="section-head">
+                <div>
+                    <h2>Форма редактирования</h2>
+                    <p id="admin_hint" class="muted">Выберите модель и загрузите шаблон payload.</p>
+                </div>
+                <button id="admin_template" class="ghost-button" type="button">Подставить шаблон</button>
+            </div>
+
+            <div class="admin-grid">
+                <label class="input-block">
+                    <span>Admin token</span>
+                    <input id="admin_token" type="password" placeholder="Bearer token" />
+                </label>
+                <label class="input-block">
+                    <span>Модель</span>
+                    <select id="admin_model_type">
+                        <option value="place">place</option>
+                        <option value="power">power</option>
+                        <option value="kbm">kbm</option>
+                        <option value="age_experience">age_experience</option>
+                        <option value="season">season</option>
+                        <option value="limitation">limitation</option>
+                        <option value="base_price">base_price</option>
+                    </select>
+                </label>
+                <label class="input-block">
+                    <span>ID записи</span>
+                    <input id="admin_item_id" type="text" placeholder="Нужен для update/delete" />
+                </label>
+            </div>
+
+            <textarea id="admin_payload" class="admin-textarea" rows="10"></textarea>
+
+            <div class="admin-actions">
+                <button id="admin_refresh" class="ghost-button" type="button">Обновить список</button>
+                <button id="admin_create" class="primary-button" type="button">Создать</button>
+                <button id="admin_update" class="primary-button" type="button">Обновить</button>
+                <button id="admin_delete" class="danger-button" type="button">Удалить</button>
+            </div>
+
+            <div id="admin_status" class="status-box">Статус операций появится здесь.</div>
+        </section>
+
+        <section class="panel">
+            <div class="section-head">
+                <div>
+                    <h2>Текущие записи</h2>
+                    <p class="muted">Клик по записи подставляет `ID` и payload в форму выше.</p>
+                </div>
+            </div>
+            <div id="admin_list" class="record-grid">
+                <p class="muted">Нажмите «Обновить список», чтобы загрузить данные.</p>
+            </div>
+        </section>
+    </main>
+</div>
+<script src="/static/admin.js"></script>
+</body>
+</html>

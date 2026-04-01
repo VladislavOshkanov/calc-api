@@ -174,18 +174,15 @@ pub async fn calculate_coefficient(
         .as_f64()
         .ok_or("Invalid max_base_price in base_price")?;
 
-    // Правила для безограничительного полиса (КО, КБМ, КВС):
-    // Если limitation.limited == false, то:
-    //  - КО берём из записи (ожидается 2.32 в справочнике)
-    //  - КБМ принудительно 1.17
-    //  - КВС принудительно 1.0
+    // Правила для безограничительного полиса:
+    // при неограниченном списке водителей КБМ и КВС принимаются равными 1.0.
     let limited_flag = limitation_doc
         .get("limited")
         .and_then(|v| v.as_bool())
         .unwrap_or(true);
 
     let (eff_kbm_coeff, eff_age_experience_coeff) = if !limited_flag {
-        (1.17_f64, 1.0_f64)
+        (1.0_f64, 1.0_f64)
     } else {
         (kbm_coeff, age_experience_coeff)
     };
