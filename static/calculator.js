@@ -22,6 +22,10 @@ const selectorLabels = {
     season: "Период использования"
 };
 
+function compareRussianStrings(left, right) {
+    return left.localeCompare(right, "ru", { sensitivity: "base" });
+}
+
 function formatNumber(value) {
     return new Intl.NumberFormat("ru-RU", {
         maximumFractionDigits: 2,
@@ -78,7 +82,12 @@ function createSelector(type, items) {
     const select = document.createElement("select");
     select.id = type;
 
-    items.forEach((item) => {
+    const sortedItems = [...items];
+    if (type === "place") {
+        sortedItems.sort((left, right) => compareRussianStrings(left.name, right.name));
+    }
+
+    sortedItems.forEach((item) => {
         const option = document.createElement("option");
         option.value = item.id?.$oid || item._id?.$oid || item.id || item._id;
         option.textContent = renderOptionLabel(type, item);
