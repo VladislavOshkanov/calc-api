@@ -2,7 +2,7 @@
 
 # Keep the Rust toolchain out of the runtime image.  The manifest-only build
 # makes dependency compilation cacheable when application sources change.
-FROM rust:1.88-slim-bookworm AS builder
+FROM rust:1.97.1-slim-bookworm AS builder
 
 WORKDIR /app
 
