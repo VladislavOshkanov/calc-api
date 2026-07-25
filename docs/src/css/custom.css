@@ -1,0 +1,18 @@
+:root {
+  --ifm-color-primary: #0b6efd;
+  --ifm-color-primary-dark: #095fd2;
+  --ifm-color-primary-darker: #084fb0;
+  --ifm-color-primary-darkest: #063d89;
+  --ifm-color-primary-light: #2b82ff;
+  --ifm-color-primary-lighter: #4c96ff;
+  --ifm-color-primary-lightest: #7cb2ff;
+}
+
+.hero--primary {
+  background: linear-gradient(135deg, #0b6efd 0%, #1d4ed8 100%);
+}
+
+.menu__link--active,
+.breadcrumbs__link--active {
+  font-weight: 600;
+}

@@ -6,8 +6,14 @@
   `cargo build`
 
 - **Run the app**:  
-  `cargo run`  
+  `cargo run --bin openapi`  
   (Server listens on port 8000 by default)
+
+- **Seed reference data**:  
+  `cargo run --bin seed_reference_data`
+
+- **Seed places**:  
+  `cargo run --bin seed_places`
 
 - **Test all**:  
   `cargo test`

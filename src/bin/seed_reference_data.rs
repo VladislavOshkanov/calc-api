@@ -38,7 +38,7 @@ struct LimitationSeed {
 struct PowerSeed {
     min_power: i32,
     max_power: i32,
-    coefficent: f64,
+    coefficient: f64,
 }
 
 #[derive(Deserialize)]
@@ -115,7 +115,7 @@ async fn main() -> Result<()> {
             id: None,
             min_power: item.min_power,
             max_power: item.max_power,
-            coefficent: item.coefficent,
+            coefficient: item.coefficient,
         })
         .collect();
     db.collection::<Power>("powers").insert_many(powers).await?;

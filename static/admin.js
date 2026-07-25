@@ -7,8 +7,8 @@ const adminList = document.getElementById("admin_list");
 const adminHint = document.getElementById("admin_hint");
 
 const modelTemplates = {
-    place: { name: "Москва", coefficent: 1.8 },
-    power: { min_power: 101, max_power: 120, coefficent: 1.2 },
+    place: { name: "Москва", coefficient: 1.8 },
+    power: { min_power: 101, max_power: 120, coefficient: 1.2 },
     kbm: { class: 3, coefficient: 1.17 },
     age_experience: {
         age: 22,

@@ -39,14 +39,14 @@ function formatMoney(value) {
 
 function renderOptionLabel(type, item) {
     if (type === "place") {
-        return `${item.name} · КТ ${formatNumber(item.coefficent)}`;
+        return `${item.name} · КТ ${formatNumber(item.coefficient)}`;
     }
 
     if (type === "power") {
         const range = item.max_power >= 999
             ? `от ${item.min_power} л.с.`
             : `${item.min_power}-${item.max_power} л.с.`;
-        return `${range} · КМ ${formatNumber(item.coefficent)}`;
+        return `${range} · КМ ${formatNumber(item.coefficient)}`;
     }
 
     if (type === "kbm") {

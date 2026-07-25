@@ -19,7 +19,7 @@ pub async fn add_place(
     let place = Place {
         id: None,
         name: create_place.name,
-        coefficent: create_place.coefficent,
+        coefficient: create_place.coefficient,
     };
 
     let result = collection
@@ -83,7 +83,7 @@ pub async fn update_place(
     let update = doc! {
         "$set": {
             "name": place.name.clone(),
-            "coefficent": place.coefficent,
+            "coefficient": place.coefficient,
         }
     };
 

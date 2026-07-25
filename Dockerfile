@@ -1,45 +1,38 @@
-ARG BINARY_NAME_DEFAULT=openapi
-ARG MY_GREAT_CONFIG_DEFAULT="someconfig-default-value"
+# syntax=docker/dockerfile:1.7
 
-FROM clux/muslrust:stable as builder
-RUN groupadd -g 10001 -r dockergrp && useradd -r -g dockergrp -u 10001 dockeruser
-ARG BINARY_NAME_DEFAULT
-ENV BINARY_NAME=$BINARY_NAME_DEFAULT
-# Build the project with target x86_64-unknown-linux-musl
+# Keep the Rust toolchain out of the runtime image.  The manifest-only build
+# makes dependency compilation cacheable when application sources change.
+FROM rust:1.88-slim-bookworm AS builder
 
-# Build dummy main with the project's Cargo lock and toml
-# This is a docker trick in order to avoid downloading and building 
-# dependencies when lock and toml not is modified.
-COPY Cargo.lock .
-COPY Cargo.toml .
-RUN mkdir src \
-    && echo "fn main() {print!(\"Dummy main\");} // dummy file" > src/main.rs
-RUN rustup target add x86_64-unknown-linux-musl
-RUN set -x && cargo build --target x86_64-unknown-linux-musl --release
-RUN ["/bin/bash", "-c", "set -x && rm target/x86_64-unknown-linux-musl/release/deps/${BINARY_NAME//-/_}*"]
+WORKDIR /app
 
-# Now add the rest of the project and build the real main
+COPY Cargo.toml Cargo.lock ./
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/usr/local/cargo/git \
+    mkdir src \
+    && printf 'fn main() {}\n' > src/main.rs \
+    && cargo build --locked --release --bin openapi \
+    && rm -f target/release/openapi target/release/deps/openapi-*
+
 COPY src ./src
-RUN set -x && cargo build --target x86_64-unknown-linux-musl --release
-RUN mkdir -p /build-out
-RUN set -x && cp target/x86_64-unknown-linux-musl/release/$BINARY_NAME /build-out/
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/usr/local/cargo/git \
+    cargo build --locked --release --bin openapi
 
-# Create a minimal docker image 
-FROM scratch
+FROM debian:bookworm-slim AS runtime
 
-COPY --from=0 /etc/passwd /etc/passwd
-USER dockeruser
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --gid 10001 app \
+    && useradd --uid 10001 --gid app --create-home --shell /usr/sbin/nologin app
 
-ARG BINARY_NAME_DEFAULT
-ENV BINARY_NAME=$BINARY_NAME_DEFAULT
-ARG MY_GREAT_CONFIG_DEFAULT
-ENV MY_GREAT_CONFIG=$MY_GREAT_CONFIG_DEFAULT
+WORKDIR /app
+COPY --from=builder --chown=app:app /app/target/release/openapi ./openapi
+COPY --chown=app:app static ./static
 
-ENV RUST_LOG="error,$BINARY_NAME=info"
-COPY --from=builder /build-out/$BINARY_NAME /
-COPY Rocket.toml .
+ENV RUST_LOG=error,openapi=info
+USER app
 
-# Start with an execution list (there is no sh in a scratch image)
-# No shell => no variable expansion, |, <, >, etc 
-# Hard coded start command
-CMD ["/openapi"]
+EXPOSE 8000
+CMD ["./openapi"]

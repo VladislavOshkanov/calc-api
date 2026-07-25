@@ -54,7 +54,7 @@ async fn main() -> Result<()> {
 
         // Коэффициент в данных записан с запятой
         let coef_str = coef_raw.replace(',', ".");
-        let coefficent: f64 = match coef_str.parse() {
+        let coefficient: f64 = match coef_str.parse() {
             Ok(v) => v,
             Err(_) => {
                 skipped += 1;
@@ -65,7 +65,7 @@ async fn main() -> Result<()> {
         // Upsert по name
         let filter = doc! { "name": name };
         let update = doc! {
-            "$set": { "name": name, "coefficent": coefficent },
+            "$set": { "name": name, "coefficient": coefficient },
             "$setOnInsert": { }
         };
         let opts = mongodb::options::UpdateOptions::builder()

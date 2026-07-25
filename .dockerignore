@@ -1,0 +1,12 @@
+.git
+.env
+.env.*
+!.env.example
+target
+docs
+tests
+curl
+Readme.md
+CRUSH.md
+Rocket.toml
+docker-compose.yaml

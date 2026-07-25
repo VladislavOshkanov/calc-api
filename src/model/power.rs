@@ -8,14 +8,12 @@ pub struct Power {
     pub id: Option<ObjectId>, // Уникальный идентификатор в MongoDB
     pub min_power: i32, // Минимальная мощность в л.с.
     pub max_power: i32, // Максимальная мощность в л.с.
-    #[serde(alias = "coefficient")]
-    pub coefficent: f64, // Коэффициент для диапазона мощности
+    pub coefficient: f64, // Коэффициент для диапазона мощности
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct CreatePower {
     pub min_power: i32, // Минимальная мощность в л.с.
     pub max_power: i32, // Максимальная мощность в л.с.
-    #[serde(alias = "coefficient")]
-    pub coefficent: f64, // Коэффициент для диапазона мощности
+    pub coefficient: f64, // Коэффициент для диапазона мощности
 }

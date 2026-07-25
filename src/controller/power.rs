@@ -20,7 +20,7 @@ pub async fn add_power(
         id: None,
         min_power: create_power.min_power,
         max_power: create_power.max_power,
-        coefficent: create_power.coefficent,
+        coefficient: create_power.coefficient,
     };
 
     let result = collection
@@ -85,7 +85,7 @@ pub async fn update_power(
         "$set": {
             "min_power": power.min_power,
             "max_power": power.max_power,
-            "coefficent": power.coefficent,
+            "coefficient": power.coefficient,
         }
     };
 

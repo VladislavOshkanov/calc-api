@@ -37,7 +37,7 @@ impl TestClient {
     async fn create_place(&self) -> Result<serde_json::Value> {
         let place_data = json!({
             "name": "Test Place",
-            "coefficent": 1.5
+            "coefficient": 1.5
         });
 
         let response = self
@@ -76,7 +76,7 @@ impl TestClient {
     async fn update_place(&self, id: &str) -> Result<serde_json::Value> {
         let place_data = json!({
             "name": "Updated Test Place",
-            "coefficent": 2.0
+            "coefficient": 2.0
         });
 
         let response = self
@@ -105,7 +105,7 @@ impl TestClient {
         let power_data = json!({
             "min_power": 100,
             "max_power": 150,
-            "coefficent": 1.2
+            "coefficient": 1.2
         });
 
         let response = self
@@ -145,7 +145,7 @@ impl TestClient {
         let power_data = json!({
             "min_power": 150,
             "max_power": 200,
-            "coefficent": 1.4
+            "coefficient": 1.4
         });
 
         let response = self
