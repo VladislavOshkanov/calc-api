@@ -1,5 +1,5 @@
 use mongodb::Client;
-use openapi::{build_router, AppState};
+use openapi::{AppState, build_router};
 use std::net::SocketAddr;
 use std::sync::Arc;
 

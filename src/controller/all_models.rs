@@ -1,3 +1,4 @@
+use crate::AppState;
 use crate::model::age_experience::AgeExperience;
 use crate::model::base_price::BasePrice;
 use crate::model::kbm::Kbm;
@@ -5,8 +6,7 @@ use crate::model::limitation::Limitation;
 use crate::model::place::Place;
 use crate::model::power::Power;
 use crate::model::season::Season;
-use crate::AppState;
-use axum::{extract::State, Json};
+use axum::{Json, extract::State};
 use futures::TryStreamExt;
 use mongodb::bson::doc;
 use serde::Serialize;

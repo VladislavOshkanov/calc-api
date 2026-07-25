@@ -1,4 +1,4 @@
-use mongodb::bson::{oid::ObjectId, DateTime};
+use mongodb::bson::{DateTime, oid::ObjectId};
 use serde::{Deserialize, Serialize};
 
 /// Модель BasePrice для базовых цен страховки

@@ -1,5 +1,5 @@
 use crate::AppState;
-use axum::{extract::State, Json};
+use axum::{Json, extract::State};
 use mongodb::bson::{doc, oid::ObjectId};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -141,11 +141,10 @@ pub async fn calculate_coefficient(
         .ok_or("Invalid coefficient in season")?;
 
     // Правило КС: при периоде использования >= 9 месяцев коэффициент сезонности равен 1.0
-    if let Some(months) = season_doc.get("months").and_then(|v| v.as_i64()) {
-        if months >= 9 {
+    if let Some(months) = season_doc.get("months").and_then(|v| v.as_i64())
+        && months >= 9 {
             season_coeff = 1.0;
         }
-    }
 
     // Получение последней базовой цены по дате создания (сортировка по created_at в убывающем порядке)
     let base_price_collection = client

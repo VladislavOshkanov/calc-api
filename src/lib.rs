@@ -14,10 +14,10 @@ use crate::controller::season::*;
 use axum::extract::Path;
 use axum::response::Html;
 use axum::{
+    Router,
     http::StatusCode,
     middleware,
     routing::{get, post},
-    Router,
 };
 use mongodb::Client;
 use std::sync::Arc;

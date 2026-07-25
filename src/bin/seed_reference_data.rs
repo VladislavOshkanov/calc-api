@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
+use mongodb::Client;
 use mongodb::bson::DateTime;
 use mongodb::options::ClientOptions;
-use mongodb::Client;
 use openapi::model::age_experience::AgeExperience;
 use openapi::model::base_price::BasePrice;
 use openapi::model::kbm::Kbm;

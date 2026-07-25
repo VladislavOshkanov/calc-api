@@ -1,10 +1,10 @@
 use anyhow::Result;
 use axum::{
+    Router,
     body::Body,
-    http::{header, Request, StatusCode},
+    http::{Request, StatusCode, header},
     middleware,
     routing::get,
-    Router,
 };
 use openapi::auth::auth_middleware::admin_auth;
 use tower::ServiceExt;

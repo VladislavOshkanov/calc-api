@@ -1,11 +1,11 @@
-use crate::model::base_price::{BasePrice, CreateBasePrice};
 use crate::AppState;
+use crate::model::base_price::{BasePrice, CreateBasePrice};
 use axum::{
-    extract::{Path, State},
     Json,
+    extract::{Path, State},
 };
 use futures::TryStreamExt;
-use mongodb::bson::{doc, oid::ObjectId, DateTime};
+use mongodb::bson::{DateTime, doc, oid::ObjectId};
 use std::sync::Arc;
 
 /// POST-эндпоинт для добавления нового объекта "BasePrice".

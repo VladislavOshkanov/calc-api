@@ -1,8 +1,8 @@
-use crate::model::power::{CreatePower, Power};
 use crate::AppState;
+use crate::model::power::{CreatePower, Power};
 use axum::{
-    extract::{Path, State},
     Json,
+    extract::{Path, State},
 };
 use futures::TryStreamExt;
 use mongodb::bson::{doc, oid::ObjectId};

@@ -1,8 +1,8 @@
-use crate::model::age_experience::{AgeExperience, CreateAgeExperience};
 use crate::AppState;
+use crate::model::age_experience::{AgeExperience, CreateAgeExperience};
 use axum::{
-    extract::{Path, State},
     Json,
+    extract::{Path, State},
 };
 use futures::TryStreamExt;
 use mongodb::bson::{doc, oid::ObjectId};

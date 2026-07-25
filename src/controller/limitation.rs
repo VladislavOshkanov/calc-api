@@ -1,8 +1,8 @@
-use crate::model::limitation::{CreateLimitation, Limitation};
 use crate::AppState;
+use crate::model::limitation::{CreateLimitation, Limitation};
 use axum::{
-    extract::{Path, State},
     Json,
+    extract::{Path, State},
 };
 use futures::TryStreamExt;
 use mongodb::bson::{doc, oid::ObjectId};
