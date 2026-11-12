@@ -7,31 +7,74 @@ on:
     branches: ["main", "master"]
 
 jobs:
-  build:
+  rust:
     runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:8.0.15
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.adminCommand({ping:1}).ok'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
       - name: Install toolchain
         uses: dtolnay/rust-toolchain@v1
         with:
-          toolchain: stable
-      - name: Cache cargo registry
+          toolchain: 1.99.1
+          components: rustfmt, clippy
+      - name: Cache Cargo
         uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-      - name: Cache target
-        uses: actions/cache@v4
-        with:
-          path: target
-          key: ${{ runner.os }}-cargo-target-${{ hashFiles('**/Cargo.lock') }}
-      - name: Set up Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          default: true
+            target
+          key: ${{ runner.os }}-rust-1.99.1-${{ hashFiles('Cargo.lock') }}
+      - name: Check formatting
+        run: cargo fmt --check
+      - name: Clippy
+        run: cargo clippy --locked --all-targets --all-features -- -D warnings
+      - name: Tests
+        run: cargo test --locked
+      - name: MongoDB regression tests
+        run: cargo test --locked --test regression_test -- --ignored
       - name: Build
-        run: cargo build --all-targets --release
+        run: cargo build --locked --all-targets --release
+      - name: E2E tests
+        env:
+          ADMIN_TOKEN: ci-e2e-token
+          MONGODB_URI: mongodb://127.0.0.1:27017/openapi_e2e_ci
+          E2E_BASE_URL: http://127.0.0.1:8000
+        run: |
+          ./target/release/openapi > /tmp/openapi-e2e.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent "$E2E_BASE_URL/static/calculator.js" > /dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          cargo test --locked --test e2e_tests -- --ignored
+
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+      - name: UI regression test
+        run: node --test tests/admin_ui_test.cjs
+      - name: Install documentation dependencies
+        working-directory: docs
+        run: npm ci
+      - name: Build documentation
+        working-directory: docs
+        run: npm run build

@@ -15,13 +15,13 @@ Axum-сервис для расчёта стоимости ОСАГО с пуб�
 
 ### Требования
 
-- Rust toolchain
+- Rust 1.99.1 (версия закреплена в `rust-toolchain.toml`)
 - MongoDB
 
 ### Поднять MongoDB
 
 ```bash
-docker run -d --name openapi-mongo -p 27017:27017 mongo:7
+docker run -d --name openapi-mongo -p 27017:27017 -v openapi_mongo_data:/data/db mongo:8.0.15
 ```
 
 Основной сервис по умолчанию подключается к `mongodb://localhost:27017` и использует базу `openapi`.
@@ -45,6 +45,7 @@ cargo run --bin seed_places
 ### Запустить сервис
 
 ```bash
+export ADMIN_TOKEN="$(openssl rand -hex 32)"
 cargo run --bin openapi
 ```
 
@@ -55,10 +56,10 @@ cargo run --bin openapi
 
 ## Переменные окружения
 
-- `ADMIN_TOKEN` — Bearer-токен для всех административных API под `/admin/*`. Если переменная не задана, используется `test_admin_token`.
-- `MONGODB_URI` — используется сидерами `seed_reference_data` и `seed_places`.
+- `ADMIN_TOKEN` — Bearer-токен для всех административных API под `/admin/*`. Обязателен: при отсутствии или пустом значении сервер не запускается.
+- `MONGODB_URI` — адрес MongoDB для сервера и сидеров, по умолчанию `mongodb://localhost:27017`.
 
-Основной сервер сейчас не читает `MONGODB_URI` и всегда подключается к `mongodb://localhost:27017`.
+Сервер использует базу из `MONGODB_URI`, если она указана, иначе `openapi`. Сидеры заполняют базу `openapi`.
 
 ## Логика расчёта
 
@@ -147,18 +148,43 @@ npm install
 npm run start
 ```
 
-Node.js нужен только для сайта документации, не для самого API.
+Node.js нужен для сайта документации и теста интерфейса, не для самого API.
 
 ## Проверка проекта
 
 ```bash
 cargo test
-cargo fmt
+cargo fmt --check
 cargo clippy --all-targets --all-features -- -D warnings
 ```
 
 E2E-тесты запускаются против уже поднятого сервера:
 
 ```bash
-E2E_BASE_URL=http://127.0.0.1:8000 ADMIN_TOKEN=test_admin_token cargo test --test e2e_tests
+E2E_BASE_URL=http://127.0.0.1:8000 cargo test --test e2e_tests -- --ignored
 ```
+
+`ADMIN_TOKEN` при запуске E2E должен совпадать с токеном сервера. Используйте отдельную тестовую базу в `MONGODB_URI`. Без `--ignored` E2E явно помечаются как пропущенные.
+
+Проверка расчёта с локальной MongoDB создаёт и удаляет собственную временную базу:
+
+```bash
+cargo test --test regression_test -- --include-ignored
+node --test tests/admin_ui_test.cjs
+```
+
+Ошибки API возвращаются в JSON `{"message":"..."}` со статусами 400 (неверный ID), 401 (авторизация), 404 (запись отсутствует), 422 (невалидные данные), 500 (ошибка данных сервера) и 503 (ошибка MongoDB). Цены и коэффициенты должны быть конечными положительными числами; границы диапазонов проверяются при создании и обновлении.
+
+Статические ресурсы встроены в бинарный файл; после изменения JS/CSS требуется пересборка.
+
+## Обновление стека
+
+Сборка, Docker и CI используют Rust 1.99.1. Для локальной работы через rustup запускайте `cargo` из `$HOME/.cargo/bin`, чтобы применялся `rust-toolchain.toml`; Homebrew Cargo использует установленный Homebrew Rust независимо от этого файла.
+
+HTTP-сервер запускается через `axum::serve` и корректно завершает активные запросы при SIGTERM или Ctrl+C. Документация использует Docusaurus 3.10.2; CI собирает её на Node.js 24.
+
+В Compose закреплена MongoDB 8.0.15 и объявлен volume `mongo_data`. Перед переводом существующего контейнера на этот volume перенесите данные из текущего хранилища и проверьте резервную копию. Запуск Compose с новым пустым volume не переносит существующие данные автоматически. Обновление Rust-зависимостей не требует миграции коллекций или перехода на BSON 3.
+
+Для совместимости со старыми справочниками `Place` и `Power` читают поле `coefficent`; API возвращает каноническое `coefficient`. При обновлении записи старое поле удаляется, поэтому массовая миграция не требуется.
+
+В `docs/package.json` заданы security overrides для `tinypool`, `serialize-javascript`, `qs` и `uuid` внутри `sockjs`. Они закрывают уязвимости транзитивных зависимостей, которые не устраняются обычным `npm audit fix`. В цепочке SVGR остаётся предупреждение низкой важности для `deepmerge` без исправленного релиза; проверяйте его при следующих обновлениях.

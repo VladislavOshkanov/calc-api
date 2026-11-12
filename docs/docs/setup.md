@@ -7,7 +7,7 @@ title: Локальный запуск
 
 ## Требования
 
-- Rust toolchain
+- Rust 1.99.1 (версия закреплена в `rust-toolchain.toml`)
 - MongoDB
 - Node.js и npm только если нужно запускать сайт документации
 
@@ -16,7 +16,7 @@ title: Локальный запуск
 ### 1. Поднять MongoDB
 
 ```bash
-docker run -d --name openapi-mongo -p 27017:27017 mongo:7
+docker run -d --name openapi-mongo -p 27017:27017 -v openapi_mongo_data:/data/db mongo:8.0.15
 ```
 
 ### 2. Заполнить справочники
@@ -29,10 +29,11 @@ cargo run --bin seed_places
 ### 3. Запустить сервер
 
 ```bash
+export ADMIN_TOKEN="$(openssl rand -hex 32)"
 cargo run --bin openapi
 ```
 
-Сервис по умолчанию слушает `127.0.0.1:8000` и подключается к `mongodb://localhost:27017`.
+Сервис по умолчанию слушает `0.0.0.0:8000` и подключается к `mongodb://localhost:27017`.
 
 ### 4. Проверить интерфейсы
 

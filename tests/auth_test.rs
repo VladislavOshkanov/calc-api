@@ -15,7 +15,10 @@ const ADMIN_TOKEN: &str = "test_admin_token";
 async fn test_auth_middleware() -> Result<()> {
     let app = Router::new()
         .route("/admin/place", get(|| async { StatusCode::OK }))
-        .layer(middleware::from_fn(admin_auth));
+        .layer(middleware::from_fn_with_state(
+            ADMIN_TOKEN.to_owned(),
+            admin_auth,
+        ));
 
     let response = app
         .clone()

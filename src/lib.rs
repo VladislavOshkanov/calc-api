@@ -1,5 +1,6 @@
 pub mod auth;
 pub mod controller;
+pub mod error;
 pub mod model;
 
 use crate::controller::age_experience::*;
@@ -29,7 +30,22 @@ pub struct AppState {
     pub db_client: Client,
 }
 
+impl AppState {
+    pub fn database(&self) -> mongodb::Database {
+        self.db_client
+            .default_database()
+            .unwrap_or_else(|| self.db_client.database("openapi"))
+    }
+}
+
 pub fn build_router(shared_state: Arc<AppState>) -> Router {
+    let token = std::env::var("ADMIN_TOKEN").expect("ADMIN_TOKEN must be set");
+    assert!(!token.trim().is_empty(), "ADMIN_TOKEN must not be empty");
+    build_router_with_admin_token(shared_state, token)
+}
+
+pub fn build_router_with_admin_token(shared_state: Arc<AppState>, token: String) -> Router {
+    assert!(!token.trim().is_empty(), "ADMIN_TOKEN must not be empty");
     let admin_routes = Router::new()
         .route("/admin/place", post(add_place).get(get_places))
         .route(
@@ -81,7 +97,7 @@ pub fn build_router(shared_state: Arc<AppState>) -> Router {
                 .put(update_base_price)
                 .delete(delete_base_price),
         )
-        .layer(middleware::from_fn(admin_auth));
+        .layer(middleware::from_fn_with_state(token, admin_auth));
 
     Router::new()
         .route("/api/all-models", get(get_all_models))
@@ -115,15 +131,20 @@ async fn render_html(path: &str) -> Result<Html<String>, (StatusCode, String)> {
 async fn static_files(
     Path(file): Path<String>,
 ) -> Result<(axum::http::HeaderMap, Vec<u8>), (StatusCode, String)> {
-    let path = format!("static/{}", file);
-    let data = fs::read(&path)
-        .await
-        .map_err(|e| (StatusCode::NOT_FOUND, format!("not found: {}", e)))?;
+    // Only explicit bundled assets are exposed; filesystem paths and symlinks are never read.
+    let data: &[u8] = match file.as_str() {
+        "index.html" => include_bytes!("../static/index.html"),
+        "admin.html" => include_bytes!("../static/admin.html"),
+        "style.css" => include_bytes!("../static/style.css"),
+        "admin.js" => include_bytes!("../static/admin.js"),
+        "calculator.js" => include_bytes!("../static/calculator.js"),
+        _ => return Err((StatusCode::NOT_FOUND, "Not found".into())),
+    };
     let mut headers = axum::http::HeaderMap::new();
-    let mime = mime_guess::from_path(&path).first_or_octet_stream();
+    let mime = mime_guess::from_path(&file).first_or_octet_stream();
     headers.insert(
         axum::http::header::CONTENT_TYPE,
         axum::http::HeaderValue::from_str(mime.as_ref()).unwrap(),
     );
-    Ok((headers, data))
+    Ok((headers, data.to_vec()))
 }

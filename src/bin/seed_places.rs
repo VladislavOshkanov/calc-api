@@ -66,7 +66,7 @@ async fn main() -> Result<()> {
         let filter = doc! { "name": name };
         let update = doc! {
             "$set": { "name": name, "coefficient": coefficient },
-            "$setOnInsert": { }
+            "$unset": { "coefficent": "" }
         };
         let opts = mongodb::options::UpdateOptions::builder()
             .upsert(true)

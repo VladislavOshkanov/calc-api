@@ -1,9 +1,17 @@
 services:
   mongo:
-    image: mongo:latest
+    image: mongo:8.0.15
     ports:
       - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
   app:
     image: calc-api.cr.cloud.ru/calc-api:latest
+    environment:
+      MONGODB_URI: mongodb://mongo:27017/openapi
+      ADMIN_TOKEN: ${ADMIN_TOKEN:?Set a nonempty ADMIN_TOKEN}
     ports:
       - "8000:8000"
+
+volumes:
+  mongo_data:

@@ -3,10 +3,12 @@ use reqwest::Client;
 use serde_json::json;
 use std::time::Duration;
 
-const ADMIN_TOKEN: &str = "test_admin_token";
+fn admin_token() -> String {
+    std::env::var("ADMIN_TOKEN").expect("ADMIN_TOKEN is required for E2E tests")
+}
 
 fn e2e_base_url() -> Option<String> {
-    std::env::var("E2E_BASE_URL").ok()
+    Some(std::env::var("E2E_BASE_URL").expect("E2E_BASE_URL is required for E2E tests"))
 }
 
 struct TestClient {
@@ -21,7 +23,7 @@ impl TestClient {
         let mut headers = reqwest::header::HeaderMap::new();
         headers.insert(
             "Authorization",
-            format!("Bearer {}", ADMIN_TOKEN).parse().unwrap(),
+            format!("Bearer {}", admin_token()).parse().unwrap(),
         );
         headers.insert("Content-Type", "application/json".parse().unwrap());
 
@@ -442,6 +444,7 @@ impl TestClient {
 }
 
 #[tokio::test]
+#[ignore = "requires a running server and MongoDB"]
 async fn test_place_crud() -> Result<()> {
     let Some(client) = TestClient::new() else {
         return Ok(());
@@ -467,6 +470,7 @@ async fn test_place_crud() -> Result<()> {
 }
 
 #[tokio::test]
+#[ignore = "requires a running server and MongoDB"]
 async fn test_power_crud() -> Result<()> {
     let Some(client) = TestClient::new() else {
         return Ok(());
@@ -492,6 +496,7 @@ async fn test_power_crud() -> Result<()> {
 }
 
 #[tokio::test]
+#[ignore = "requires a running server and MongoDB"]
 async fn test_kbm_crud() -> Result<()> {
     let Some(client) = TestClient::new() else {
         return Ok(());
@@ -517,6 +522,7 @@ async fn test_kbm_crud() -> Result<()> {
 }
 
 #[tokio::test]
+#[ignore = "requires a running server and MongoDB"]
 async fn test_age_experience_crud() -> Result<()> {
     let Some(client) = TestClient::new() else {
         return Ok(());
@@ -542,6 +548,7 @@ async fn test_age_experience_crud() -> Result<()> {
 }
 
 #[tokio::test]
+#[ignore = "requires a running server and MongoDB"]
 async fn test_season_crud() -> Result<()> {
     let Some(client) = TestClient::new() else {
         return Ok(());
@@ -567,6 +574,7 @@ async fn test_season_crud() -> Result<()> {
 }
 
 #[tokio::test]
+#[ignore = "requires a running server and MongoDB"]
 async fn test_limitation_crud() -> Result<()> {
     let Some(client) = TestClient::new() else {
         return Ok(());
@@ -592,6 +600,7 @@ async fn test_limitation_crud() -> Result<()> {
 }
 
 #[tokio::test]
+#[ignore = "requires a running server and MongoDB"]
 async fn test_unauthorized_access() -> Result<()> {
     let Some(base_url) = e2e_base_url() else {
         return Ok(());
@@ -617,6 +626,7 @@ async fn test_unauthorized_access() -> Result<()> {
 }
 
 #[tokio::test]
+#[ignore = "requires a running server and MongoDB"]
 async fn test_invalid_token() -> Result<()> {
     let Some(base_url) = e2e_base_url() else {
         return Ok(());

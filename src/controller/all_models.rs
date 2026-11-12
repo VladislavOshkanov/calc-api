@@ -1,4 +1,5 @@
 use crate::AppState;
+use crate::error::ApiError;
 use crate::model::age_experience::AgeExperience;
 use crate::model::base_price::BasePrice;
 use crate::model::kbm::Kbm;
@@ -23,50 +24,44 @@ pub struct AllModelsResponse {
     pub base_price: Vec<BasePrice>,
 }
 
-pub async fn get_all_models(State(state): State<Arc<AppState>>) -> Json<AllModelsResponse> {
-    let client = &state.db_client;
-    let mut age_exp_cursor = client
-        .database("openapi")
+pub async fn get_all_models(
+    State(state): State<Arc<AppState>>,
+) -> Result<Json<AllModelsResponse>, ApiError> {
+    let mut age_exp_cursor = state
+        .database()
         .collection::<AgeExperience>("age_experiences")
         .find(doc! {})
-        .await
-        .expect("Failed to fetch age_experiences");
-    let mut kbm_cursor = client
-        .database("openapi")
+        .await?;
+    let mut kbm_cursor = state
+        .database()
         .collection::<Kbm>("kbms")
         .find(doc! {})
-        .await
-        .expect("Failed to fetch kbms");
-    let mut limitation_cursor = client
-        .database("openapi")
+        .await?;
+    let mut limitation_cursor = state
+        .database()
         .collection::<Limitation>("limitations")
         .find(doc! {})
-        .await
-        .expect("Failed to fetch limitations");
-    let mut place_cursor = client
-        .database("openapi")
+        .await?;
+    let mut place_cursor = state
+        .database()
         .collection::<Place>("places")
         .find(doc! {})
-        .await
-        .expect("Failed to fetch places");
-    let mut power_cursor = client
-        .database("openapi")
+        .await?;
+    let mut power_cursor = state
+        .database()
         .collection::<Power>("powers")
         .find(doc! {})
-        .await
-        .expect("Failed to fetch powers");
-    let mut season_cursor = client
-        .database("openapi")
+        .await?;
+    let mut season_cursor = state
+        .database()
         .collection::<Season>("seasons")
         .find(doc! {})
-        .await
-        .expect("Failed to fetch seasons");
-    let mut base_price_cursor = client
-        .database("openapi")
+        .await?;
+    let mut base_price_cursor = state
+        .database()
         .collection::<BasePrice>("base_prices")
         .find(doc! {})
-        .await
-        .expect("Failed to fetch base_prices");
+        .await?;
 
     let mut age_experience = Vec::new();
     let mut kbm = Vec::new();
@@ -76,37 +71,29 @@ pub async fn get_all_models(State(state): State<Arc<AppState>>) -> Json<AllModel
     let mut season = Vec::new();
     let mut base_price = Vec::new();
 
-    while let Some(doc) = age_exp_cursor.try_next().await.expect("Error fetching doc") {
+    while let Some(doc) = age_exp_cursor.try_next().await? {
         age_experience.push(doc);
     }
-    while let Some(doc) = kbm_cursor.try_next().await.expect("Error fetching doc") {
+    while let Some(doc) = kbm_cursor.try_next().await? {
         kbm.push(doc);
     }
-    while let Some(doc) = limitation_cursor
-        .try_next()
-        .await
-        .expect("Error fetching doc")
-    {
+    while let Some(doc) = limitation_cursor.try_next().await? {
         limitation.push(doc);
     }
-    while let Some(doc) = place_cursor.try_next().await.expect("Error fetching doc") {
+    while let Some(doc) = place_cursor.try_next().await? {
         place.push(doc);
     }
-    while let Some(doc) = power_cursor.try_next().await.expect("Error fetching doc") {
+    while let Some(doc) = power_cursor.try_next().await? {
         power.push(doc);
     }
-    while let Some(doc) = season_cursor.try_next().await.expect("Error fetching doc") {
+    while let Some(doc) = season_cursor.try_next().await? {
         season.push(doc);
     }
-    while let Some(doc) = base_price_cursor
-        .try_next()
-        .await
-        .expect("Error fetching doc")
-    {
+    while let Some(doc) = base_price_cursor.try_next().await? {
         base_price.push(doc);
     }
 
-    Json(AllModelsResponse {
+    Ok(Json(AllModelsResponse {
         age_experience,
         kbm,
         limitation,
@@ -114,5 +101,5 @@ pub async fn get_all_models(State(state): State<Arc<AppState>>) -> Json<AllModel
         power,
         season,
         base_price,
-    })
+    }))
 }

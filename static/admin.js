@@ -77,11 +77,15 @@ async function fetchList() {
             const card = document.createElement("button");
             card.type = "button";
             card.className = "record-card";
-            card.innerHTML = `
-                <span class="record-card__title">${item.name || item.label || `Запись ${item._id?.$oid || item.id?.$oid || ""}`}</span>
-                <code>${item._id?.$oid || item.id?.$oid || ""}</code>
-                <pre>${prettyJson(item)}</pre>
-            `;
+            const title = document.createElement("span");
+            title.className = "record-card__title";
+            const id = item._id?.$oid || item.id?.$oid || "";
+            title.textContent = item.name || item.label || `Запись ${id}`;
+            const code = document.createElement("code");
+            code.textContent = id;
+            const details = document.createElement("pre");
+            details.textContent = prettyJson(item);
+            card.append(title, code, details);
             card.addEventListener("click", () => {
                 adminItemId.value = item._id?.$oid || item.id?.$oid || "";
                 adminPayload.value = prettyJson(item);
@@ -174,12 +178,16 @@ adminTokenInput.addEventListener("input", rememberToken);
 adminModelSelect.addEventListener("change", updateTemplate);
 
 document.getElementById("admin_template").addEventListener("click", updateTemplate);
-document.getElementById("admin_refresh").addEventListener("click", fetchList);
-document.getElementById("admin_create").addEventListener("click", createItem);
-document.getElementById("admin_update").addEventListener("click", updateItem);
-document.getElementById("admin_delete").addEventListener("click", deleteItem);
+document.getElementById("admin_refresh").addEventListener("click", () => fetchList().catch(reportNetworkError));
+document.getElementById("admin_create").addEventListener("click", () => createItem().catch(reportNetworkError));
+document.getElementById("admin_update").addEventListener("click", () => updateItem().catch(reportNetworkError));
+document.getElementById("admin_delete").addEventListener("click", () => deleteItem().catch(reportNetworkError));
 
 updateTemplate();
 if (adminTokenInput.value) {
     fetchList();
+}
+
+function reportNetworkError() {
+    setStatus("API недоступен. Проверьте соединение с сервером.", true);
 }

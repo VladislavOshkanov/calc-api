@@ -1,4 +1,6 @@
 use crate::AppState;
+use crate::error::{ApiError, ApiJson};
+use crate::model::Validate;
 use crate::model::limitation::{CreateLimitation, Limitation};
 use axum::{
     Json,
@@ -10,10 +12,10 @@ use std::sync::Arc;
 
 pub async fn add_limitation(
     State(state): State<Arc<AppState>>,
-    Json(create_limitation): Json<CreateLimitation>,
-) -> Json<Limitation> {
-    let client = &state.db_client;
-    let collection = client.database("openapi").collection("limitations");
+    ApiJson(create_limitation): ApiJson<CreateLimitation>,
+) -> Result<Json<Limitation>, ApiError> {
+    create_limitation.validate()?;
+    let collection = state.database().collection("limitations");
 
     let limitation = Limitation {
         id: None,
@@ -21,66 +23,61 @@ pub async fn add_limitation(
         coefficient: create_limitation.coefficient,
     };
 
-    let result = collection
-        .insert_one(limitation.clone())
-        .await
-        .expect("Failed to insert limitation.");
+    let result = collection.insert_one(limitation.clone()).await?;
 
     let mut limitation_with_id = limitation;
-    limitation_with_id.id = Some(result.inserted_id.as_object_id().unwrap());
+    limitation_with_id.id = Some(
+        result
+            .inserted_id
+            .as_object_id()
+            .ok_or_else(|| ApiError::internal("Invalid inserted ID"))?,
+    );
 
-    Json(limitation_with_id)
+    Ok(Json(limitation_with_id))
 }
 
-pub async fn get_limitations(State(state): State<Arc<AppState>>) -> Json<Vec<Limitation>> {
-    let client = &state.db_client;
-    let collection = client
-        .database("openapi")
-        .collection::<Limitation>("limitations");
+pub async fn get_limitations(
+    State(state): State<Arc<AppState>>,
+) -> Result<Json<Vec<Limitation>>, ApiError> {
+    let collection = state.database().collection::<Limitation>("limitations");
 
-    let mut cursor = collection
-        .find(doc! {})
-        .await
-        .expect("Failed to fetch limitations");
+    let mut cursor = collection.find(doc! {}).await?;
 
     let mut limitations = Vec::new();
-    while let Some(doc) = cursor.try_next().await.expect("Error fetching document") {
+    while let Some(doc) = cursor.try_next().await? {
         limitations.push(doc);
     }
 
-    Json(limitations)
+    Ok(Json(limitations))
 }
 
 pub async fn get_limitation(
     State(state): State<Arc<AppState>>,
     Path(id): Path<String>,
-) -> Result<Json<Limitation>, String> {
-    let client = &state.db_client;
-    let collection = client
-        .database("openapi")
-        .collection::<Limitation>("limitations");
+) -> Result<Json<Limitation>, ApiError> {
+    let collection = state.database().collection::<Limitation>("limitations");
 
-    let object_id = ObjectId::parse_str(&id).map_err(|_| "Invalid ID format".to_string())?;
+    let object_id =
+        ObjectId::parse_str(&id).map_err(|_| ApiError::bad_request("Invalid ID format"))?;
     let filter = mongodb::bson::doc! { "_id": object_id };
 
     match collection.find_one(filter).await {
         Ok(Some(limitation)) => Ok(Json(limitation)),
-        Ok(None) => Err("Limitation not found".to_string()),
-        Err(err) => Err(format!("Failed to fetch limitation: {err}")),
+        Ok(None) => Err(ApiError::not_found("Limitation not found")),
+        Err(err) => Err(err.into()),
     }
 }
 
 pub async fn update_limitation(
     State(state): State<Arc<AppState>>,
     Path(id): Path<String>,
-    Json(limitation): Json<Limitation>,
-) -> Result<Json<Limitation>, String> {
-    let client = &state.db_client;
-    let collection = client
-        .database("openapi")
-        .collection::<Limitation>("limitations");
+    ApiJson(limitation): ApiJson<Limitation>,
+) -> Result<Json<Limitation>, ApiError> {
+    limitation.validate()?;
+    let collection = state.database().collection::<Limitation>("limitations");
 
-    let object_id = ObjectId::parse_str(&id).map_err(|_| "Invalid ID format".to_string())?;
+    let object_id =
+        ObjectId::parse_str(&id).map_err(|_| ApiError::bad_request("Invalid ID format"))?;
     let filter = doc! { "_id": object_id };
     let update = doc! {
         "$set": {
@@ -91,26 +88,24 @@ pub async fn update_limitation(
 
     match collection.update_one(filter, update).await {
         Ok(result) if result.matched_count > 0 => Ok(Json(limitation)),
-        Ok(_) => Err("Limitation not found.".to_string()),
-        Err(err) => Err(format!("Failed to update limitation: {err}")),
+        Ok(_) => Err(ApiError::not_found("Limitation not found.")),
+        Err(err) => Err(err.into()),
     }
 }
 
 pub async fn delete_limitation(
     State(state): State<Arc<AppState>>,
     Path(id): Path<String>,
-) -> Result<String, String> {
-    let client = &state.db_client;
-    let collection = client
-        .database("openapi")
-        .collection::<Limitation>("limitations");
+) -> Result<String, ApiError> {
+    let collection = state.database().collection::<Limitation>("limitations");
 
-    let object_id = ObjectId::parse_str(&id).map_err(|_| "Invalid ID format".to_string())?;
+    let object_id =
+        ObjectId::parse_str(&id).map_err(|_| ApiError::bad_request("Invalid ID format"))?;
     let filter = doc! { "_id": object_id };
 
     match collection.delete_one(filter).await {
         Ok(result) if result.deleted_count > 0 => Ok(format!("Limitation with ID {id} deleted.")),
-        Ok(_) => Err("Limitation not found.".to_string()),
-        Err(err) => Err(format!("Failed to delete limitation: {err}")),
+        Ok(_) => Err(ApiError::not_found("Limitation not found.")),
+        Err(err) => Err(err.into()),
     }
 }

@@ -1,4 +1,5 @@
 use crate::AppState;
+use crate::error::{ApiError, ApiJson};
 use axum::{Json, extract::State};
 use mongodb::bson::{doc, oid::ObjectId};
 use serde::{Deserialize, Serialize};
@@ -38,117 +39,106 @@ pub struct CoefficientDetails {
 /// POST-эндпоинт для расчета произведения коэффициентов
 pub async fn calculate_coefficient(
     State(state): State<Arc<AppState>>,
-    Json(request): Json<CoefficientRequest>,
-) -> Result<Json<CoefficientResponse>, String> {
-    let client = &state.db_client;
-
+    ApiJson(request): ApiJson<CoefficientRequest>,
+) -> Result<Json<CoefficientResponse>, ApiError> {
     // Парсинг ID
     let age_experience_id = ObjectId::parse_str(&request.age_experience_id)
-        .map_err(|_| "Invalid age_experience_id format".to_string())?;
-    let kbm_id =
-        ObjectId::parse_str(&request.kbm_id).map_err(|_| "Invalid kbm_id format".to_string())?;
+        .map_err(|_| ApiError::bad_request("Invalid age_experience_id format"))?;
+    let kbm_id = ObjectId::parse_str(&request.kbm_id)
+        .map_err(|_| ApiError::bad_request("Invalid kbm_id format"))?;
     let limitation_id = ObjectId::parse_str(&request.limitation_id)
-        .map_err(|_| "Invalid limitation_id format".to_string())?;
+        .map_err(|_| ApiError::bad_request("Invalid limitation_id format"))?;
     let place_id = ObjectId::parse_str(&request.place_id)
-        .map_err(|_| "Invalid place_id format".to_string())?;
+        .map_err(|_| ApiError::bad_request("Invalid place_id format"))?;
     let power_id = ObjectId::parse_str(&request.power_id)
-        .map_err(|_| "Invalid power_id format".to_string())?;
+        .map_err(|_| ApiError::bad_request("Invalid power_id format"))?;
     let season_id = ObjectId::parse_str(&request.season_id)
-        .map_err(|_| "Invalid season_id format".to_string())?;
+        .map_err(|_| ApiError::bad_request("Invalid season_id format"))?;
 
     // Получение коэффициента из AgeExperience
-    let age_experience_collection = client
-        .database("openapi")
+    let age_experience_collection = state
+        .database()
         .collection::<serde_json::Value>("age_experiences");
     let age_experience_filter = doc! { "_id": age_experience_id };
     let age_experience_doc = age_experience_collection
         .find_one(age_experience_filter)
-        .await
-        .map_err(|e| format!("Failed to fetch age_experience: {}", e))?
-        .ok_or("AgeExperience not found")?;
+        .await?
+        .ok_or_else(|| ApiError::not_found("AgeExperience not found"))?;
     let age_experience_coeff = age_experience_doc["coefficient"]
         .as_f64()
-        .ok_or("Invalid coefficient in age_experience")?;
+        .ok_or_else(|| ApiError::internal("Invalid coefficient in age_experience"))?;
 
     // Получение коэффициента из Kbm
-    let kbm_collection = client
-        .database("openapi")
-        .collection::<serde_json::Value>("kbms");
+    let kbm_collection = state.database().collection::<serde_json::Value>("kbms");
     let kbm_filter = doc! { "_id": kbm_id };
     let kbm_doc = kbm_collection
         .find_one(kbm_filter)
-        .await
-        .map_err(|e| format!("Failed to fetch kbm: {}", e))?
-        .ok_or("Kbm not found")?;
+        .await?
+        .ok_or_else(|| ApiError::not_found("Kbm not found"))?;
     let kbm_coeff = kbm_doc["coefficient"]
         .as_f64()
-        .ok_or("Invalid coefficient in kbm")?;
+        .ok_or_else(|| ApiError::internal("Invalid coefficient in kbm"))?;
 
     // Получение коэффициента из Limitation
-    let limitation_collection = client
-        .database("openapi")
+    let limitation_collection = state
+        .database()
         .collection::<serde_json::Value>("limitations");
     let limitation_filter = doc! { "_id": limitation_id };
     let limitation_doc = limitation_collection
         .find_one(limitation_filter)
-        .await
-        .map_err(|e| format!("Failed to fetch limitation: {}", e))?
-        .ok_or("Limitation not found")?;
+        .await?
+        .ok_or_else(|| ApiError::not_found("Limitation not found"))?;
     let limitation_coeff = limitation_doc["coefficient"]
         .as_f64()
-        .ok_or("Invalid coefficient in limitation")?;
+        .ok_or_else(|| ApiError::internal("Invalid coefficient in limitation"))?;
 
     // Получение коэффициента из Place
-    let place_collection = client
-        .database("openapi")
-        .collection::<serde_json::Value>("places");
+    let place_collection = state.database().collection::<serde_json::Value>("places");
     let place_filter = doc! { "_id": place_id };
     let place_doc = place_collection
         .find_one(place_filter)
-        .await
-        .map_err(|e| format!("Failed to fetch place: {}", e))?
-        .ok_or("Place not found")?;
-    let place_coeff = place_doc["coefficient"]
-        .as_f64()
-        .ok_or("Invalid coefficient in place")?;
+        .await?
+        .ok_or_else(|| ApiError::not_found("Place not found"))?;
+    let place_coeff = place_doc
+        .get("coefficient")
+        .or_else(|| place_doc.get("coefficent"))
+        .and_then(|v| v.as_f64())
+        .ok_or_else(|| ApiError::internal("Invalid coefficient in place"))?;
 
     // Получение коэффициента из Power
-    let power_collection = client
-        .database("openapi")
-        .collection::<serde_json::Value>("powers");
+    let power_collection = state.database().collection::<serde_json::Value>("powers");
     let power_filter = doc! { "_id": power_id };
     let power_doc = power_collection
         .find_one(power_filter)
-        .await
-        .map_err(|e| format!("Failed to fetch power: {}", e))?
-        .ok_or("Power not found")?;
-    let power_coeff = power_doc["coefficient"]
-        .as_f64()
-        .ok_or("Invalid coefficient in power")?;
+        .await?
+        .ok_or_else(|| ApiError::not_found("Power not found"))?;
+    let power_coeff = power_doc
+        .get("coefficient")
+        .or_else(|| power_doc.get("coefficent"))
+        .and_then(|v| v.as_f64())
+        .ok_or_else(|| ApiError::internal("Invalid coefficient in power"))?;
 
     // Получение коэффициента из Season
-    let season_collection = client
-        .database("openapi")
-        .collection::<serde_json::Value>("seasons");
+    let season_collection = state.database().collection::<serde_json::Value>("seasons");
     let season_filter = doc! { "_id": season_id };
     let season_doc = season_collection
         .find_one(season_filter)
-        .await
-        .map_err(|e| format!("Failed to fetch season: {}", e))?
-        .ok_or("Season not found")?;
+        .await?
+        .ok_or_else(|| ApiError::not_found("Season not found"))?;
     let mut season_coeff = season_doc["coefficient"]
         .as_f64()
-        .ok_or("Invalid coefficient in season")?;
+        .ok_or_else(|| ApiError::internal("Invalid coefficient in season"))?;
 
     // Правило КС: при периоде использования >= 9 месяцев коэффициент сезонности равен 1.0
     if let Some(months) = season_doc.get("months").and_then(|v| v.as_i64())
-        && months >= 9 {
-            season_coeff = 1.0;
-        }
+        && months >= 9
+    {
+        season_coeff = 1.0;
+    }
 
     // Получение последней базовой цены по дате создания (сортировка по created_at в убывающем порядке)
-    let base_price_collection = client
-        .database("openapi")
+    let base_price_collection = state
+        .database()
         .collection::<serde_json::Value>("base_prices");
     let sort_options = mongodb::options::FindOneOptions::builder()
         .sort(doc! { "created_at": -1 }) // Сортировка по убыванию даты
@@ -157,15 +147,14 @@ pub async fn calculate_coefficient(
     let base_price_doc = base_price_collection
         .find_one(doc! {})
         .with_options(sort_options)
-        .await
-        .map_err(|e| format!("Failed to fetch latest base_price: {}", e))?
-        .ok_or("No base_price records found")?;
+        .await?
+        .ok_or_else(|| ApiError::internal("No base_price records found"))?;
     let min_base_price = base_price_doc["min_base_price"]
         .as_f64()
-        .ok_or("Invalid min_base_price in base_price")?;
+        .ok_or_else(|| ApiError::internal("Invalid min_base_price in base_price"))?;
     let max_base_price = base_price_doc["max_base_price"]
         .as_f64()
-        .ok_or("Invalid max_base_price in base_price")?;
+        .ok_or_else(|| ApiError::internal("Invalid max_base_price in base_price"))?;
 
     // Правила для безограничительного полиса:
     // при неограниченном списке водителей КБМ и КВС принимаются равными 1.0.

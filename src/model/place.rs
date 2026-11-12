@@ -5,7 +5,8 @@ use serde::{Deserialize, Serialize};
 pub struct Place {
     #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
     pub id: Option<ObjectId>, // ID объекта
-    pub name: String,     // Название места
+    pub name: String, // Название места
+    #[serde(alias = "coefficent")]
     pub coefficient: f64, // Коэффициент
 }
 
